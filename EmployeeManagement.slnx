@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EmployeeManagement.Client/EmployeeManagement.Client.csproj" />
+    <Project Path="src/EmployeeManagement.Contracts/EmployeeManagement.Contracts.csproj" />
+    <Project Path="src/EmployeeManagement.Web/EmployeeManagement.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EmployeeManagement.Tests/EmployeeManagement.Tests.csproj" />
+  </Folder>
+</Solution>
