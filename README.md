@@ -68,6 +68,11 @@ TODO
 - **PUT returns 200 with the updated employee** (not 204) so the client doesn't need a second GET.
 - **Delete is a single SQL `DELETE`** (`ExecuteDeleteAsync`); the database's `ON DELETE CASCADE` removes the address.
 - **Swagger UI only in Development**, which is what `dotnet run` and F5 use. It reads ASP.NET Core's built-in OpenAPI document instead of generating its own.
+- **One page for the UI** (`Client/Pages/Employees.razor` at `/`): the employee table plus the add form, split into `EmployeeTable` and `AddEmployeeForm` components. The table shows combined Name and Address columns; after a successful add, the new employee is inserted into the table without reloading the list.
+- **No prerendering.** The Blazor template prerenders pages on the server by default, which would make the page fetch its data on the server through a different code path. With `prerender: false` the UI runs only in the browser and every read and write goes through the API with `HttpClient`. The trade-off: the page shows nothing until the WebAssembly runtime has downloaded.
+- **The form validates with the same code as the API.** A small custom validator (`EmployeeFormValidator`) runs the Contracts `EmployeeRequestNormalizer` + `EmployeeRequestValidator`, so the form and the API cannot disagree, and the nested address is validated too (Blazor's built-in `DataAnnotationsValidator` skips nested objects). Errors appear per field as you type and on submit; nothing is sent until the form is valid.
+- **API errors appear next to the field they belong to.** The 400 error keys (`Email`, `Address.Zip`) are mapped onto the matching inputs, and a 409 duplicate email is shown under Email. If the server can't be reached, a general error message is shown instead.
+- **Normalization lives in Contracts** (`EmployeeRequestNormalizer`), shared by the API and the form.
 - **Pinned package versions** (no `10.*` wildcards) so a fresh clone restores exactly what was tested.
 - TODO
 

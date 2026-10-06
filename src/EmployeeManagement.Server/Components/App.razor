@@ -11,12 +11,17 @@
     <link rel="stylesheet" href="@Assets["EmployeeManagement.Server.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet @rendermode="InteractiveWebAssembly" />
+    <HeadOutlet @rendermode="renderMode" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveWebAssembly" />
+    <Routes @rendermode="renderMode" />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
 </html>
+
+@code {
+    // No prerendering: the UI runs only in the browser and gets all data from the API.
+    private static readonly IComponentRenderMode renderMode = new InteractiveWebAssemblyRenderMode(prerender: false);
+}

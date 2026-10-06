@@ -27,7 +27,7 @@ public sealed class EmployeeService(AppDbContext db) : IEmployeeService
 
     public async Task<EmployeeResult> CreateAsync(EmployeeRequest request, CancellationToken cancellationToken = default)
     {
-        var normalized = EmployeeMapping.Normalize(request);
+        var normalized = EmployeeRequestNormalizer.Normalize(request);
         var errors = EmployeeRequestValidator.Validate(normalized);
         if (errors.Count > 0)
         {
@@ -48,7 +48,7 @@ public sealed class EmployeeService(AppDbContext db) : IEmployeeService
 
     public async Task<EmployeeResult> UpdateAsync(int id, EmployeeRequest request, CancellationToken cancellationToken = default)
     {
-        var normalized = EmployeeMapping.Normalize(request);
+        var normalized = EmployeeRequestNormalizer.Normalize(request);
         var errors = EmployeeRequestValidator.Validate(normalized);
         if (errors.Count > 0)
         {

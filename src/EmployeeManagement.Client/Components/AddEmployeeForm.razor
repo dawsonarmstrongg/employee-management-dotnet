@@ -1,0 +1,121 @@
+@inject EmployeeApiClient Api
+
+<EditForm EditContext="editContext" OnValidSubmit="SaveAsync">
+    <EmployeeFormValidator @ref="validator" />
+
+    @if (errorMessage is not null)
+    {
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
+    }
+    @if (savedMessage is not null)
+    {
+        <div class="alert alert-success" role="status">@savedMessage</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label for="firstName" class="form-label">First name</label>
+            <InputText id="firstName" class="form-control" @bind-Value="request.FirstName" />
+            <ValidationMessage For="() => request.FirstName" />
+        </div>
+        <div class="col-md-6">
+            <label for="lastName" class="form-label">Last name</label>
+            <InputText id="lastName" class="form-control" @bind-Value="request.LastName" />
+            <ValidationMessage For="() => request.LastName" />
+        </div>
+        <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" type="email" class="form-control" @bind-Value="request.Email" />
+            <ValidationMessage For="() => request.Email" />
+        </div>
+        <div class="col-md-3">
+            <label for="phone" class="form-label">Phone</label>
+            <InputText id="phone" type="tel" class="form-control" placeholder="(555)-123-4567" @bind-Value="request.PhoneNumber" />
+            <ValidationMessage For="() => request.PhoneNumber" />
+        </div>
+        <div class="col-md-3">
+            <label for="dateOfBirth" class="form-label">Date of birth</label>
+            <InputDate id="dateOfBirth" class="form-control" @bind-Value="request.DateOfBirth" />
+            <ValidationMessage For="() => request.DateOfBirth" />
+        </div>
+        <div class="col-md-6">
+            <label for="address1" class="form-label">Address 1</label>
+            <InputText id="address1" class="form-control" @bind-Value="request.Address!.Address1" />
+            <ValidationMessage For="() => request.Address!.Address1" />
+        </div>
+        <div class="col-md-6">
+            <label for="address2" class="form-label">Address 2 <span class="text-muted">(optional)</span></label>
+            <InputText id="address2" class="form-control" @bind-Value="request.Address!.Address2" />
+            <ValidationMessage For="() => request.Address!.Address2" />
+        </div>
+        <div class="col-md-6">
+            <label for="city" class="form-label">City</label>
+            <InputText id="city" class="form-control" @bind-Value="request.Address!.City" />
+            <ValidationMessage For="() => request.Address!.City" />
+        </div>
+        <div class="col-md-2">
+            <label for="state" class="form-label">State</label>
+            <InputText id="state" class="form-control text-uppercase" maxlength="2" placeholder="TX" @bind-Value="request.Address!.State" />
+            <ValidationMessage For="() => request.Address!.State" />
+        </div>
+        <div class="col-md-4">
+            <label for="zip" class="form-label">Zip</label>
+            <InputText id="zip" class="form-control" maxlength="5" inputmode="numeric" placeholder="12345" @bind-Value="request.Address!.Zip" />
+            <ValidationMessage For="() => request.Address!.Zip" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-4" disabled="@saving">
+        @(saving ? "Saving..." : "Add employee")
+    </button>
+</EditForm>
+
+@code {
+    private EmployeeRequest request = new();
+    private EditContext editContext = default!;
+    private EmployeeFormValidator? validator;
+    private bool saving;
+    private string? errorMessage;
+    private string? savedMessage;
+
+    // Raised after the API creates the employee, so the page can add it to the table.
+    [Parameter]
+    public EventCallback<EmployeeDto> OnCreated { get; set; }
+
+    protected override void OnInitialized() => editContext = new EditContext(request);
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        errorMessage = null;
+        savedMessage = null;
+
+        try
+        {
+            var result = await Api.CreateAsync(request);
+            if (result.Employee is not null)
+            {
+                savedMessage = $"Added {EmployeeDisplay.FullName(result.Employee)}.";
+                await OnCreated.InvokeAsync(result.Employee);
+                request = new EmployeeRequest();
+                editContext = new EditContext(request);
+            }
+            else if (result.Errors is not null)
+            {
+                validator!.DisplayErrors(result.Errors);
+            }
+            else
+            {
+                errorMessage = result.ErrorMessage;
+            }
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "Could not reach the server. Check that it is running and try again.";
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

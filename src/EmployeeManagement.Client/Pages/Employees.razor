@@ -1,0 +1,59 @@
+@page "/"
+@inject EmployeeApiClient Api
+
+<PageTitle>Employees</PageTitle>
+
+<h1>Employees</h1>
+
+@if (loadError is not null)
+{
+    <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
+        <span>@loadError</span>
+        <button class="btn btn-outline-danger btn-sm" @onclick="LoadAsync">Try again</button>
+    </div>
+}
+else if (employees is null)
+{
+    <p><em>Loading employees...</em></p>
+}
+else
+{
+    <EmployeeTable Employees="employees" />
+}
+
+<h2 class="h4 mt-5 mb-3">Add employee</h2>
+<AddEmployeeForm OnCreated="HandleCreated" />
+
+@code {
+    private List<EmployeeDto>? employees;
+    private string? loadError;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        loadError = null;
+        employees = null;
+        try
+        {
+            employees = [.. await Api.GetAllAsync()];
+        }
+        catch (HttpRequestException)
+        {
+            loadError = "Could not load employees. Check that the server is running.";
+        }
+    }
+
+    // Add the new employee locally (same order as the API) instead of reloading the whole list.
+    private void HandleCreated(EmployeeDto employee)
+    {
+        if (employees is null)
+        {
+            return;
+        }
+
+        employees = [.. employees.Append(employee)
+            .OrderBy(e => e.LastName, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(e => e.FirstName, StringComparer.OrdinalIgnoreCase)];
+    }
+}

@@ -21,25 +21,6 @@ public static class EmployeeMapping
 
     public static EmployeeDto ToDtoFrom(Employee employee) => ToDtoCompiled(employee);
 
-    // Trims every field, uppercases State and turns a blank Address2 into null.
-    // Runs before validation so "  " counts as missing and duplicate checks compare clean values.
-    public static EmployeeRequest Normalize(EmployeeRequest request) => new()
-    {
-        FirstName = request.FirstName?.Trim(),
-        LastName = request.LastName?.Trim(),
-        Email = request.Email?.Trim(),
-        PhoneNumber = request.PhoneNumber?.Trim(),
-        DateOfBirth = request.DateOfBirth,
-        Address = request.Address is null ? null : new AddressRequest
-        {
-            Address1 = request.Address.Address1?.Trim(),
-            Address2 = string.IsNullOrWhiteSpace(request.Address.Address2) ? null : request.Address.Address2.Trim(),
-            City = request.Address.City?.Trim(),
-            State = request.Address.State?.Trim().ToUpperInvariant(),
-            Zip = request.Address.Zip?.Trim(),
-        },
-    };
-
     // Copies a normalized, validated request onto an entity (new or existing).
     public static void Apply(EmployeeRequest request, Employee employee)
     {

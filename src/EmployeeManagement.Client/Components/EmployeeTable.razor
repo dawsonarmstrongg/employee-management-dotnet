@@ -1,0 +1,37 @@
+@if (Employees.Count == 0)
+{
+    <p class="text-muted">No employees yet. Add one below.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Date of birth</th>
+                    <th scope="col">Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var employee in Employees)
+                {
+                    <tr @key="employee.Id">
+                        <td>@EmployeeDisplay.FullName(employee)</td>
+                        <td>@employee.Email</td>
+                        <td>@employee.PhoneNumber</td>
+                        <td>@EmployeeDisplay.DateOfBirth(employee.DateOfBirth)</td>
+                        <td>@EmployeeDisplay.FullAddress(employee.Address)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<EmployeeDto> Employees { get; set; } = [];
+}
