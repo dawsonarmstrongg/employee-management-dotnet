@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Server (C# Dev Kit)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/EmployeeManagement.Server/EmployeeManagement.Server.csproj",
+      "launchConfigurationId": "TargetFramework=;http"
+    },
+    {
+      "name": "Run Server (coreclr fallback)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/EmployeeManagement.Server/bin/Debug/net10.0/EmployeeManagement.Server.dll",
+      "cwd": "${workspaceFolder}/src/EmployeeManagement.Server",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5233"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
+    }
+  ]
+}

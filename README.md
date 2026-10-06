@@ -19,6 +19,7 @@ dotnet test
 ```
 
 - UI: the URL printed by `dotnet run` (e.g. `http://localhost:5233`)
+- VS Code: press **F5** and pick **Run Server (C# Dev Kit)** (or the `coreclr` fallback) from `.vscode/launch.json`. `Ctrl+Shift+B` builds; the `watch` task runs `dotnet watch`.
 - Swagger UI: `/swagger` — TODO
 
 ## Solution layout
