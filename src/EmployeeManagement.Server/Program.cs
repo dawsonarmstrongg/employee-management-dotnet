@@ -1,3 +1,4 @@
+using EmployeeManagement.Server;
 using EmployeeManagement.Server.Components;
 using EmployeeManagement.Server.Data;
 using EmployeeManagement.Server.Employees;
@@ -33,9 +34,10 @@ else
     app.UseHsts();
 }
 
-// Browser requests for unknown pages re-execute to the Blazor "not found" page.
-// API endpoints opt out (see EmployeeEndpoints) so their errors stay JSON.
+// Browser requests for unknown pages re-execute to the Blazor "not found" page;
+// requests under /api opt out and always get JSON problem details instead.
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseApiErrorResponses();
 
 app.UseHttpsRedirection();
 

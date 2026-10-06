@@ -32,7 +32,7 @@ dotnet test
 | PUT | `/api/employees/{id}` | 200 updated employee | 400, 404, 409 |
 | DELETE | `/api/employees/{id}` | 204 (address deleted by cascade) | 404 |
 
-Errors use the standard problem details JSON format; 400 responses list messages per field (for example `Address.Zip`).
+Errors use the standard problem details JSON format; 400 responses list messages per field (for example `Address.Zip`). Every error under `/api` is JSON, including ones the framework produces before our code runs (an unknown route or `/api/employees/abc` → 404, an unsupported method → 405, malformed JSON → 400).
 
 ## Solution layout
 

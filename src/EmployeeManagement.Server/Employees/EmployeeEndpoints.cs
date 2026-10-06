@@ -9,10 +9,8 @@ public static class EmployeeEndpoints
 {
     public static IEndpointRouteBuilder MapEmployeeEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/employees")
-            .WithTags("Employees")
-            // Keep API errors as JSON: never re-execute them to the HTML "not found" page.
-            .WithMetadata(new SkipStatusCodePagesAttribute());
+        var group = app.MapGroup("/api/employees").WithTags("Employees");
+
 
         group.MapGet("/", GetAll).WithName("GetEmployees").WithSummary("List all employees.");
         group.MapGet("/{id:int}", GetById).WithName("GetEmployee").WithSummary("Get one employee.");
