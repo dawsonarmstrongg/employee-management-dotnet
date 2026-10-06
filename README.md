@@ -7,7 +7,7 @@ Employee management app built with .NET 10, ASP.NET Core Web API, Blazor WebAsse
 ## Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (pinned via `global.json`)
-- No database install needed — SQLite file is created and seeded on startup.
+- No database install needed — on startup the app applies EF Core migrations, which create `src/EmployeeManagement.Server/employees.db` and insert 5 seed employees. Delete that file to reset the data.
 
 ## Build, run, test
 
@@ -40,6 +40,12 @@ TODO
 
 - Blazor WebAssembly hosted by the API project, rather than Interactive Server, so the UI is a true API client.
 - Host project renamed from the template default `Web` to `Server` so it pairs clearly with `Client` (Web suggested it might be the UI).
+- **EF Core Code First with migrations** (`Data/Migrations`), applied automatically at startup via `Database.Migrate()`. Chosen over `EnsureCreated()` because migrations can evolve the schema later without dropping data.
+- **Seed data via `HasData`**, so the 5 employees/addresses are part of the initial migration.
+- **One-to-one Employee → Address**: `Addresses.EmployeeId` is a unique foreign key with `ON DELETE CASCADE`, so deleting an employee deletes their address in the database itself.
+- **Case-insensitive unique email**: the `Email` column uses SQLite's `NOCASE` collation plus a unique index, so the database rejects `Jane@x.com` if `jane@x.com` exists. (NOCASE only folds ASCII letters — acceptable for email addresses here.)
+- **Age**: the spec's add form collects age, but the Employee field list doesn't mention it. I store it as a required integer. Storing a date of birth would avoid stale ages; I kept `Age` to match the spec.
+- **Pinned package versions** (no `10.*` wildcards) so a fresh clone restores exactly what was tested.
 - TODO
 
 ## Incomplete requirements
