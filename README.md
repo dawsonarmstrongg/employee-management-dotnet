@@ -14,7 +14,7 @@ Employee management app built with .NET 10, ASP.NET Core Web API, Blazor WebAsse
 ```powershell
 dotnet restore
 dotnet build
-dotnet run --project src/EmployeeManagement.Web
+dotnet run --project src/EmployeeManagement.Server
 dotnet test
 ```
 
@@ -25,12 +25,12 @@ dotnet test
 
 | Project | Purpose |
 |---|---|
-| `src/EmployeeManagement.Web` | Single host: REST API, EF Core + SQLite, serves the Blazor client |
+| `src/EmployeeManagement.Server` | Single host: REST API, EF Core + SQLite, serves the Blazor client |
 | `src/EmployeeManagement.Client` | Blazor WebAssembly UI — talks to the API over HTTP only |
 | `src/EmployeeManagement.Contracts` | Request/response DTOs shared by API and UI |
 | `tests/EmployeeManagement.Tests` | xUnit unit + integration tests |
 
-The Client project has no reference to the Web project or EF Core, so the UI *cannot* access the database directly — the "UI goes through the API" rule is enforced by the project graph.
+The Client project has no reference to the Server project or EF Core, so the UI *cannot* access the database directly — the "UI goes through the API" rule is enforced by the project graph.
 
 ## Architecture overview
 
@@ -39,6 +39,7 @@ TODO
 ## Assumptions and technical decisions
 
 - Blazor WebAssembly hosted by the API project, rather than Interactive Server, so the UI is a true API client.
+- Host project renamed from the template default `Web` to `Server` so it pairs clearly with `Client` (Web suggested it might be the UI).
 - TODO
 
 ## Incomplete requirements

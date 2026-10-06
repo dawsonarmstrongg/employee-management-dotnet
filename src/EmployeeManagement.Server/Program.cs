@@ -1,4 +1,4 @@
-using EmployeeManagement.Web.Components;
+using EmployeeManagement.Server.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -2,7 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/EmployeeManagement.Client/EmployeeManagement.Client.csproj" />
     <Project Path="src/EmployeeManagement.Contracts/EmployeeManagement.Contracts.csproj" />
-    <Project Path="src/EmployeeManagement.Web/EmployeeManagement.Web.csproj" />
+    <Project Path="src/EmployeeManagement.Server/EmployeeManagement.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EmployeeManagement.Tests/EmployeeManagement.Tests.csproj" />
