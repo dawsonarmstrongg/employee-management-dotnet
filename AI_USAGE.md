@@ -13,6 +13,7 @@
 | 3 | Rename the Web project to Server. | Folder/csproj/namespace/test-reference rename; also caught the scoped-CSS bundle name in `App.razor`. |
 | 4 | Create the data layer: entities, DbContext, one-to-one with cascade delete, case-insensitive unique email, seed data, migrations. | Entities + `AppDbContext` + `InitialCreate` migration; verified schema, seed rows, unique-email and cascade behavior directly against the SQLite file. |
 | 5 | Replace Age with DateOfBirth (my decision: stored ages go stale). | New migration `ReplaceAgeWithDateOfBirth`; verified it both upgrades the existing database in place and builds a fresh one from scratch, and that the email collation, unique index and cascade FK survived SQLite's table rebuild. |
+| 6 | Build the Contracts: response DTOs, request types and shared validation rules. | DTOs, request classes, custom `[UsState]`/`[DateOfBirth]` attributes and a validator that also checks the nested address. Verified 22 valid/invalid cases (phone formats, non-ASCII digits, states, ZIPs, dates, empty form) and the JSON shape with a throwaway script before committing. |
 | | TODO — add more as work progresses | |
 
 ## Where AI was useful
@@ -25,6 +26,7 @@
 
 - **Template layout:** `dotnet new blazor` produced a nested `src/EmployeeManagement.Web/EmployeeManagement.Web/` folder plus a stray `.sln`, and named the client `EmployeeManagement.Web.Client`. I had it flatten the layout, rename the client project, and fix namespaces/references before the first commit.
 - **Stale build during verification:** the first verification run used `--no-build` after the migration was added, so the app reported "No migrations were found" and created an empty database. Caught by reading the startup log; rebuilt and re-ran.
+- **Verification script bug:** the AI's first throwaway check script didn't compile (it used record `with` syntax on a class). Fixed the script; the Contracts code itself was unaffected.
 - TODO
 
 ## How I reviewed and tested AI-generated code
