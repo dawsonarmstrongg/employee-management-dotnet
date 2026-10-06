@@ -9,11 +9,11 @@ internal static class SeedData
     public static void Apply(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Employee>().HasData(
-            new Employee { Id = 1, FirstName = "Jane", LastName = "Doe", Email = "jane.doe@example.com", PhoneNumber = "(555)-123-4567", Age = 34 },
-            new Employee { Id = 2, FirstName = "John", LastName = "Smith", Email = "john.smith@example.com", PhoneNumber = "(555)-234-5678", Age = 45 },
-            new Employee { Id = 3, FirstName = "Maria", LastName = "Garcia", Email = "maria.garcia@example.com", PhoneNumber = "(555)-345-6789", Age = 29 },
-            new Employee { Id = 4, FirstName = "David", LastName = "Lee", Email = "david.lee@example.com", PhoneNumber = "(555)-456-7890", Age = 52 },
-            new Employee { Id = 5, FirstName = "Aisha", LastName = "Khan", Email = "aisha.khan@example.com", PhoneNumber = "(555)-567-8901", Age = 38 });
+            new Employee { Id = 1, FirstName = "Jane", LastName = "Doe", Email = "jane.doe@example.com", PhoneNumber = "(555)-123-4567", DateOfBirth = new DateOnly(1991, 3, 14) },
+            new Employee { Id = 2, FirstName = "John", LastName = "Smith", Email = "john.smith@example.com", PhoneNumber = "(555)-234-5678", DateOfBirth = new DateOnly(1980, 7, 2) },
+            new Employee { Id = 3, FirstName = "Maria", LastName = "Garcia", Email = "maria.garcia@example.com", PhoneNumber = "(555)-345-6789", DateOfBirth = new DateOnly(1996, 11, 23) },
+            new Employee { Id = 4, FirstName = "David", LastName = "Lee", Email = "david.lee@example.com", PhoneNumber = "(555)-456-7890", DateOfBirth = new DateOnly(1973, 1, 30) },
+            new Employee { Id = 5, FirstName = "Aisha", LastName = "Khan", Email = "aisha.khan@example.com", PhoneNumber = "(555)-567-8901", DateOfBirth = new DateOnly(1987, 9, 8) });
 
         modelBuilder.Entity<Address>().HasData(
             new Address { Id = 1, EmployeeId = 1, Address1 = "123 Main St", Address2 = "Apt 4B", City = "Springfield", State = "IL", Zip = "62701" },

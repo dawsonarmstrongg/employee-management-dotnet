@@ -44,7 +44,7 @@ TODO
 - **Seed data via `HasData`**, so the 5 employees/addresses are part of the initial migration.
 - **One-to-one Employee → Address**: `Addresses.EmployeeId` is a unique foreign key with `ON DELETE CASCADE`, so deleting an employee deletes their address in the database itself.
 - **Case-insensitive unique email**: the `Email` column uses SQLite's `NOCASE` collation plus a unique index, so the database rejects `Jane@x.com` if `jane@x.com` exists. (NOCASE only folds ASCII letters — acceptable for email addresses here.)
-- **Age**: the spec's add form collects age, but the Employee field list doesn't mention it. I store it as a required integer. Storing a date of birth would avoid stale ages; I kept `Age` to match the spec.
+- **Date of birth instead of age (deliberate deviation):** the spec's add form lists *age*. A stored age goes stale every birthday, so `Employee` stores `DateOfBirth` (`DateOnly`, saved as `yyyy-MM-dd` text in SQLite) and the form collects date of birth. Age can be calculated from it whenever it's needed. This was changed through a second migration (`ReplaceAgeWithDateOfBirth`) rather than editing the first one, so existing databases upgrade in place.
 - **Pinned package versions** (no `10.*` wildcards) so a fresh clone restores exactly what was tested.
 - TODO
 
