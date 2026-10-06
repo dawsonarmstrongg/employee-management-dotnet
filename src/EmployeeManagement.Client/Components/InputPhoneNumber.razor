@@ -1,0 +1,57 @@
+@inherits InputBase<string?>
+@* A phone input that formats the number on every keystroke (oninput), e.g. typing 5551234567 shows (555)-123-4567.
+   Validation messages wait until the number is complete or the user leaves the field, so an error doesn't flash
+   after the first digit. Once an error is showing, it updates on every keystroke so it clears as soon as it's fixed. *@
+
+<input @attributes="AdditionalAttributes"
+       type="tel"
+       inputmode="numeric"
+       autocomplete="tel-national"
+       class="@CssClass"
+       @bind:get="CurrentValueAsString"
+       @bind:set="OnInputAsync"
+       @bind:event="oninput"
+       @onblur="OnBlur" />
+
+@code {
+    private const int CompleteLength = 14; // "(555)-123-4567"
+    private bool changedSinceValidation;
+
+    private async Task OnInputAsync(string? value)
+    {
+        var formatted = PhoneNumberFormatter.FormatAsYouType(value);
+        var hasErrors = EditContext.GetValidationMessages(FieldIdentifier).Any();
+
+        if (formatted.Length == CompleteLength || hasErrors)
+        {
+            // Updates the model and notifies the form, which re-validates this field.
+            CurrentValueAsString = formatted;
+            changedSinceValidation = false;
+        }
+        else
+        {
+            // Updates the model only; validation waits for blur or a complete number.
+            await ValueChanged.InvokeAsync(formatted);
+            changedSinceValidation = true;
+        }
+    }
+
+    private void OnBlur()
+    {
+        if (changedSinceValidation)
+        {
+            changedSinceValidation = false;
+            EditContext.NotifyFieldChanged(FieldIdentifier);
+        }
+    }
+
+    protected override bool TryParseValueFromString(
+        string? value,
+        out string? result,
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = null;
+        return true;
+    }
+}

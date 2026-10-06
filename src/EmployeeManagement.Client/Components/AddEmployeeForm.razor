@@ -30,7 +30,7 @@
         </div>
         <div class="col-md-3">
             <label for="phone" class="form-label">Phone</label>
-            <InputText id="phone" type="tel" class="form-control" placeholder="(555)-123-4567" @bind-Value="request.PhoneNumber" />
+            <InputPhoneNumber id="phone" class="form-control" placeholder="(555)-123-4567" @bind-Value="request.PhoneNumber" />
             <ValidationMessage For="() => request.PhoneNumber" />
         </div>
         <div class="col-md-3">
