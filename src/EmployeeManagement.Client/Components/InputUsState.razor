@@ -1,0 +1,190 @@
+@using EmployeeManagement.Contracts.Validation
+@inherits InputBase<string?>
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="state-picker">
+    <input @ref="inputElement"
+           @attributes="AdditionalAttributes"
+           id="@inputId"
+           class="@CssClass"
+           type="text"
+           role="combobox"
+           autocomplete="off"
+           maxlength="2"
+           aria-autocomplete="list"
+           aria-controls="@listId"
+           aria-expanded="@(ShowList ? "true" : "false")"
+           aria-activedescendant="@(ShowList && activeIndex >= 0 ? OptionId(matches[activeIndex]) : null)"
+           @bind:get="CurrentValueAsString"
+           @bind:set="OnInputAsync"
+           @bind:event="oninput"
+           @onfocus="Open"
+           @onclick="Open"
+           @onblur="OnBlur"
+           @onkeydown="OnKeyDown" />
+
+    @if (ShowList)
+    {
+        <ul id="@listId" role="listbox" class="list-group state-options shadow">
+            @for (var i = 0; i < matches.Count; i++)
+            {
+                var state = matches[i];
+                var isActive = i == activeIndex;
+                <li id="@OptionId(state)"
+                    role="option"
+                    aria-selected="@(isActive ? "true" : "false")"
+                    class="list-group-item list-group-item-action @(isActive ? "active" : null)"
+                    @onmousedown="() => Select(state)"
+                    @onmousedown:preventDefault="true">
+                    <strong>@state.Code</strong> <span class="state-name">@state.Name</span>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    private ElementReference inputElement;
+    private IJSObjectReference? module;
+    private IReadOnlyList<UsState> matches = UsStates.All;
+    private bool isOpen;
+    private int activeIndex = -1;
+    private bool scrollPending;
+    private bool changedSinceValidation;
+    private string inputId = default!;
+    private string listId = default!;
+
+    private bool ShowList => isOpen && matches.Count > 0;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        inputId = AdditionalAttributes?.TryGetValue("id", out var id) == true && id is string s
+            ? s
+            : $"state-{Guid.NewGuid():N}";
+        listId = $"{inputId}-options";
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/InputUsState.razor.js");
+            await module.InvokeVoidAsync("init", inputElement);
+        }
+
+        if (scrollPending && module is not null && ShowList && activeIndex >= 0)
+        {
+            scrollPending = false;
+            await module.InvokeVoidAsync("scrollIntoView", OptionId(matches[activeIndex]));
+        }
+    }
+
+    private async Task OnInputAsync(string? value)
+    {
+        var code = UsStateFilter.Clean(value);
+        matches = UsStateFilter.Filter(code);
+        activeIndex = code.Length > 0 && matches.Count > 0 ? 0 : -1;
+        isOpen = true;
+        scrollPending = true;
+
+        // Same timing as the phone input: validate once two letters are typed (or an error is
+        // already showing so it clears immediately); otherwise wait for blur.
+        var hasErrors = EditContext.GetValidationMessages(FieldIdentifier).Any();
+        if (code.Length == 2 || hasErrors)
+        {
+            CurrentValueAsString = code;
+            changedSinceValidation = false;
+        }
+        else
+        {
+            await ValueChanged.InvokeAsync(code);
+            changedSinceValidation = true;
+        }
+    }
+
+    private void Open()
+    {
+        if (isOpen)
+        {
+            return;
+        }
+
+        matches = UsStateFilter.Filter(CurrentValueAsString);
+        activeIndex = matches.ToList().FindIndex(s => s.Code == CurrentValueAsString);
+        isOpen = true;
+        scrollPending = true;
+    }
+
+    private void Close()
+    {
+        isOpen = false;
+        activeIndex = -1;
+    }
+
+    private void Select(UsState state)
+    {
+        CurrentValueAsString = state.Code;
+        changedSinceValidation = false;
+        Close();
+    }
+
+    private void OnBlur()
+    {
+        Close();
+        if (changedSinceValidation)
+        {
+            changedSinceValidation = false;
+            EditContext.NotifyFieldChanged(FieldIdentifier);
+        }
+    }
+
+    private void OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                if (!ShowList) { Open(); }
+                if (matches.Count > 0) { activeIndex = Math.Min(activeIndex + 1, matches.Count - 1); }
+                scrollPending = true;
+                break;
+            case "ArrowUp":
+                if (ShowList) { activeIndex = Math.Max(activeIndex - 1, 0); scrollPending = true; }
+                break;
+            case "Enter":
+                // JS cancels the form submit only when an option is highlighted.
+                if (ShowList && activeIndex >= 0) { Select(matches[activeIndex]); }
+                break;
+            case "Escape":
+                Close();
+                break;
+        }
+    }
+
+    private string OptionId(UsState state) => $"{listId}-{state.Code}";
+
+    protected override bool TryParseValueFromString(string? value, out string? result, out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await module.InvokeVoidAsync("dispose", inputElement);
+            await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+}

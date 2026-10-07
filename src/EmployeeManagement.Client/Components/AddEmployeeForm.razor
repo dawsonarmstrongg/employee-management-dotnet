@@ -55,7 +55,7 @@
         </div>
         <div class="col-md-2">
             <label for="state" class="form-label">State</label>
-            <InputText id="state" class="form-control text-uppercase" maxlength="2" placeholder="TX" @bind-Value="request.Address!.State" />
+            <InputUsState id="state" class="form-control" placeholder="TX" @bind-Value="request.Address!.State" />
             <ValidationMessage For="() => request.Address!.State" />
         </div>
         <div class="col-md-4">

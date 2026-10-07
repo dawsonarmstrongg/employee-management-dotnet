@@ -1,0 +1,23 @@
+.state-picker {
+    position: relative;
+}
+
+.state-options {
+    position: absolute;
+    z-index: 1000;
+    top: 100%;
+    left: 0;
+    min-width: 14rem;
+    max-height: 15rem;
+    margin-top: 2px;
+    overflow-y: auto;
+}
+
+.state-options .list-group-item {
+    cursor: pointer;
+    padding: 0.35rem 0.75rem;
+}
+
+.state-name {
+    opacity: 0.75;
+}
