@@ -1,6 +1,5 @@
 using EmployeeManagement.Contracts.Employees;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagement.Server.Employees;
 
@@ -13,10 +12,15 @@ public static class EmployeeEndpoints
 
 
         group.MapGet("/", GetAll).WithName("GetEmployees").WithSummary("List all employees.");
-        group.MapGet("/{id:int}", GetById).WithName("GetEmployee").WithSummary("Get one employee.");
-        group.MapPost("/", Create).WithName("CreateEmployee").WithSummary("Create an employee.");
-        group.MapPut("/{id:int}", Update).WithName("UpdateEmployee").WithSummary("Replace an employee's details.");
-        group.MapDelete("/{id:int}", Delete).WithName("DeleteEmployee").WithSummary("Delete an employee and their address.");
+        group.MapGet("/{id:int}", GetById).WithName("GetEmployee").WithSummary("Get one employee.")
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        group.MapPost("/", Create).WithName("CreateEmployee").WithSummary("Create an employee.")
+            .ProducesProblem(StatusCodes.Status409Conflict);
+        group.MapPut("/{id:int}", Update).WithName("UpdateEmployee").WithSummary("Replace an employee's details.")
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status409Conflict);
+        group.MapDelete("/{id:int}", Delete).WithName("DeleteEmployee").WithSummary("Delete an employee and their address.")
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }
@@ -24,14 +28,14 @@ public static class EmployeeEndpoints
     private static async Task<Ok<IReadOnlyList<EmployeeDto>>> GetAll(IEmployeeService service, CancellationToken ct) =>
         TypedResults.Ok(await service.GetAllAsync(ct));
 
-    private static async Task<Results<Ok<EmployeeDto>, NotFound<ProblemDetails>>> GetById(
+    private static async Task<Results<Ok<EmployeeDto>, ProblemHttpResult>> GetById(
         int id, IEmployeeService service, CancellationToken ct)
     {
         var employee = await service.GetByIdAsync(id, ct);
         return employee is null ? NotFoundProblem(id) : TypedResults.Ok(employee);
     }
 
-    private static async Task<Results<Created<EmployeeDto>, ValidationProblem, Conflict<ProblemDetails>>> Create(
+    private static async Task<Results<Created<EmployeeDto>, ValidationProblem, ProblemHttpResult>> Create(
         EmployeeRequest request, IEmployeeService service, CancellationToken ct)
     {
         var result = await service.CreateAsync(request, ct);
@@ -44,7 +48,7 @@ public static class EmployeeEndpoints
         };
     }
 
-    private static async Task<Results<Ok<EmployeeDto>, ValidationProblem, NotFound<ProblemDetails>, Conflict<ProblemDetails>>> Update(
+    private static async Task<Results<Ok<EmployeeDto>, ValidationProblem, ProblemHttpResult>> Update(
         int id, EmployeeRequest request, IEmployeeService service, CancellationToken ct)
     {
         var result = await service.UpdateAsync(id, request, ct);
@@ -58,21 +62,19 @@ public static class EmployeeEndpoints
         };
     }
 
-    private static async Task<Results<NoContent, NotFound<ProblemDetails>>> Delete(
+    private static async Task<Results<NoContent, ProblemHttpResult>> Delete(
         int id, IEmployeeService service, CancellationToken ct) =>
         await service.DeleteAsync(id, ct) ? TypedResults.NoContent() : NotFoundProblem(id);
 
-    private static NotFound<ProblemDetails> NotFoundProblem(int id) => TypedResults.NotFound(new ProblemDetails
-    {
-        Title = "Employee not found.",
-        Detail = $"No employee exists with id {id}.",
-        Status = StatusCodes.Status404NotFound,
-    });
+    // TypedResults.Problem sends application/problem+json (RFC 9457), the same as the 400 validation errors.
+    // Its status code isn't part of the return type, so the routes above declare 404/409 for the OpenAPI document.
+    private static ProblemHttpResult NotFoundProblem(int id) => TypedResults.Problem(
+        title: "Employee not found.",
+        detail: $"No employee exists with id {id}.",
+        statusCode: StatusCodes.Status404NotFound);
 
-    private static Conflict<ProblemDetails> DuplicateEmailProblem(string? email) => TypedResults.Conflict(new ProblemDetails
-    {
-        Title = "Email address already in use.",
-        Detail = $"Another employee already uses the email address '{email?.Trim()}'.",
-        Status = StatusCodes.Status409Conflict,
-    });
+    private static ProblemHttpResult DuplicateEmailProblem(string? email) => TypedResults.Problem(
+        title: "Email address already in use.",
+        detail: $"Another employee already uses the email address '{email?.Trim()}'.",
+        statusCode: StatusCodes.Status409Conflict);
 }
