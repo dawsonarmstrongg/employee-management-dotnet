@@ -2,7 +2,8 @@
 
 ## Tools
 
-- **GitHub Copilot CLI** (agent mode) using **Claude Opus** — planning, scaffolding, implementation, tests, docs.
+- **GitHub Copilot CLI** (agent mode) using **Claude Opus** — planning, scaffolding, implementation, throwaway browser checks, docs, and checking the QA sub-agent's work.
+- **Claude Sonnet 5 as a separate QA sub-agent**, started from the same Copilot CLI session with fresh context. It wrote and ran the automated test suite (see [QA sub-agent](#qa-sub-agent-summary)).
 
 ## Representative prompts and outcomes
 
@@ -20,6 +21,7 @@
 | 10 | Format the phone number automatically while typing, not only after leaving the field. | `InputPhoneNumber` component + `PhoneNumberFormatter`. Tested key by key in a browser: each digit reformats immediately, an 11th digit is ignored, Backspace works, letters and dots are stripped, pasted `+1 (555) 222-3333` becomes `(555)-222-3333`, and a saved employee stores the formatted number. |
 | 11 | Turn the State field into a dropdown that filters as I type the 2-letter code. | `InputUsState` combobox, shared `UsStates` list in Contracts (also used by `[UsState]`) and `UsStateFilter`. Tested in a browser: focus lists 51 options; `T` → TN, TX; `TE` matches by name; arrow keys + Enter select without submitting the form; click and Escape work; digits are stripped and lowercase is uppercased; `ZZ` shows the error, which clears on `TX`; a saved employee stores `TX` and the form resets. |
 | 12 | Apply my Zelis "Lumen" design brief to the whole app (summarized [below](#ui-design-prompt-summary)). Before building I narrowed it: sorting only, keep the Date of birth column, sort Name by last name and show it "Last, First". | One token file and theme, a shared component set in `Components/UI/` (11 components), a new app shell, and a redesigned employees page (sortable table, add form in a drawer with a discard check, toasts, loading/empty/error states), plus redesigned Not Found and error pages. No business logic, API calls or validation rules changed. Verified with a Playwright script in headless Edge at desktop, tablet and phone widths (85 checks: sizes and colors, sorting, keyboard and focus, validation, the 409, phone/state inputs, saving, every page state), axe-core (0 WCAG 2.2 AA violations on every page and state), and a review of every screenshot. |
+| 13 | Write a Lead QA Tester prompt and give it, with the exercise document, to a separate Sonnet sub-agent with fresh context. It may change only test files (summarized [below](#qa-sub-agent-summary)). | 98 tests (159 cases) across unit, API integration and Blazor component (bUnit) tests, each tagged with the requirement it checks, plus exploratory API, browser and accessibility checks and a written report. 158 passed and 1 failed on purpose, exposing a real inconsistency: 404 and 409 errors were sent as `application/json`. I checked every finding before acting on it: one was confirmed and fixed, one was a false alarm, and my review of the new tests found two more problems (see the corrections below). All 159 now pass. |
 | | TODO — add more as work progresses | |
 
 ## UI design prompt (summary)
@@ -39,11 +41,28 @@ The redesign came from one long prompt I wrote. In short, it asked for:
 
 **Not built, and why:** dashboard cards, charts, tabs, breadcrumbs and overflow menus (no screen needs them); the logo (no official asset is in the repo, so the header shows the app name and has a slot for one); Avenir (a licensed font, so it isn't bundled).
 
+## QA sub-agent (summary)
+
+For an independent test pass I wrote a "Lead QA Tester" prompt and ran it as a separate **Claude Sonnet 5** sub-agent, started from the Copilot CLI session.
+
+- **Why fresh context:** the sub-agent had no memory of how the app was built. It saw only the QA prompt, the exercise document and the repo, so it tested the app against the brief the way a tester who didn't write it would, instead of sharing the assumptions of the model that wrote the code. Using a different model also gave a second opinion.
+- **Guardrails in the prompt:** change only files under `tests\` and never fix the app, not even one line; a test that exposes a bug stays failing; git is read-only; don't touch my `employees.db` (tests and app runs use their own temporary database); pinned packages only, with bUnit approved and nothing else added; don't delete files; stop only processes it started; don't post to Jira or GitHub.
+- **What it delivered:** the test suite in `tests/` (described in the README's Tests section), exploratory checks of the API, the browser UI and accessibility, and a report that traced each requirement to its tests and listed findings with severity and evidence.
+- **How I checked it:** confirmed that only `tests\` had changed and that `employees.db` was untouched, re-ran the build and tests myself, and reproduced each finding before acting on it:
+
+| Finding | Verdict | What I did |
+|---|---|---|
+| 404 and 409 errors were sent as `application/json`, while 400s used `application/problem+json` | Confirmed in the code and with live requests | Fixed: both now use `TypedResults.Problem`, and the routes list them with `.ProducesProblem(...)` so Swagger still shows them. The failing test now passes. |
+| The phone field went blank during a browser test | False alarm: its script looked for `#phoneNumber`, but the field's id is `phone`, so it never typed a phone number | Re-ran the scenario with the right selector, plus typing, Ctrl+V paste and autofill: all correct. No app change. |
+| (my review) Each test run left 5 temporary database files behind | Confirmed | Fixed in the test setup (see the corrections below). |
+| (my review) Some requirement tags pointed at the wrong requirement, for example duplicate-email tests tagged as the phone requirement | Confirmed | Corrected the tags; the README now lists what each ID means. |
+
 ## Where AI was useful
 
 - Turning the requirements doc into a checklist and project layout.
 - Driving the `dotnet` CLI for scaffolding and wiring references/packages.
 - Turning a long design brief into a token file, a theme and reusable components, then checking the result with scripted browser and accessibility tests at three screen sizes.
+- An independent test pass: a sub-agent with fresh context turned the brief into requirement-tagged tests and found a real inconsistency in the API's error responses.
 - TODO
 
 ## Where AI output needed correction
@@ -60,10 +79,15 @@ The redesign came from one long prompt I wrote. In short, it asked for:
 - **Focus lost after clicking outside a dialog:** the first dialog script returned focus to whatever had focus when the dialog opened. When the discard confirmation was opened by clicking outside the drawer, that was the page `<body>`, so keyboard focus was lost. Caught by the scripted focus checks; focus now goes back to the dialog underneath, or to the page heading.
 - **Layout bugs only visible in screenshots** (all passed the scripted checks and axe): the form's section headings ("Contact", "Address") sat on the divider line because the theme un-floated the `<legend>`; "Address 2(optional)" was missing a space; the success message covered the Refresh and Add buttons for 6 seconds (moved to the bottom right); the mobile menu panel ended after its last link instead of filling the screen; names wrapped onto two lines on phones; and the hidden skip link's shadow showed as a faint strip at the top of the mobile menu.
 - **Test script mistakes, not app bugs:** the first browser script expected the wrong oldest employee for the Date of birth sort, expected the first Tab to reach the skip link (Blazor intentionally moves focus to the page heading after loading; the skip link is reached with Shift+Tab), released a held network request in the wrong order, and read a tooltip during its fade-in. Each failure was investigated before the script was changed.
+- **QA false alarm:** the QA sub-agent reported that the phone field went blank in a browser test and flagged a possible bug. Its own screenshot showed the field had never been filled: the script searched for `#phoneNumber`, but the field's id is `phone`. The same mistake meant its browser duplicate-email check never reached the server. I re-ran both with the right selector (both passed) and rejected the finding.
+- **Test cleanup that silently failed:** the QA sub-agent's test setup deleted its temporary database after each test class, but SQLite's connection pool still had the file open, so the delete failed without an error and every run left 5 files in `%TEMP%`. Fixed by turning off pooling in the tests' connection string (`Pooling=False`); a run now leaves nothing behind.
+- **Wrong requirement tags:** the QA sub-agent labeled some tests with requirement IDs that didn't match its own list (duplicate-email tests marked as the phone requirement, add-form tests as Swagger, delete tests as seed data). Found while documenting the `--filter` option; corrected the tags and re-ran the filter for every ID.
+- **Sub-agent stopped by my own chat messages:** the first two QA runs were started in the background and stopped partway, with no error, shortly after I sent a new chat message; the CLI cancelled the background sub-agent when the new message arrived. The third run was started in the foreground with a handover note describing the partial work, and finished.
 - TODO
 
 ## How I reviewed and tested AI-generated code
 
 - Read every diff before committing.
-- Built after each step; TODO — tests, Swagger checks, manual UI checks.
+- Built after each step. Since the QA pass, `dotnet test` (159 cases) must pass before a commit. Checked in Swagger that every endpoint lists its status codes. TODO — manual UI checks.
+- Independent QA pass by a separate sub-agent (above). I treated its report as claims to check, not facts: I reproduced each finding before changing anything, which caught one false alarm.
 - UI redesign: scripted browser checks (Playwright, headless Edge) at desktop, tablet and phone widths, axe-core accessibility scans, and a look at every screenshot. The screenshots caught six layout bugs that the scripted checks and axe missed (listed above).

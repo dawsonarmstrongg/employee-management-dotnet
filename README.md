@@ -32,7 +32,7 @@ dotnet test
 | PUT | `/api/employees/{id}` | 200 updated employee | 400, 404, 409 |
 | DELETE | `/api/employees/{id}` | 204 (address deleted by cascade) | 404 |
 
-Errors use the standard problem details JSON format; 400 responses list messages per field (for example `Address.Zip`). Every error under `/api` is JSON, including ones the framework produces before our code runs (an unknown route or `/api/employees/abc` → 404, an unsupported method → 405, malformed JSON → 400).
+Errors use the standard problem details JSON format (`application/problem+json`, RFC 9457); 400 responses list messages per field (for example `Address.Zip`). Every error under `/api` is JSON, including ones the framework produces before our code runs (an unknown route or `/api/employees/abc` → 404, an unsupported method → 405, malformed JSON → 400).
 
 ## Solution layout
 
@@ -41,9 +41,46 @@ Errors use the standard problem details JSON format; 400 responses list messages
 | `src/EmployeeManagement.Server` | Single host: REST API, EF Core + SQLite, serves the Blazor client |
 | `src/EmployeeManagement.Client` | Blazor WebAssembly UI — talks to the API over HTTP only |
 | `src/EmployeeManagement.Contracts` | Request/response DTOs shared by API and UI |
-| `tests/EmployeeManagement.Tests` | xUnit unit + integration tests |
+| `tests/EmployeeManagement.Tests` | xUnit unit, API integration and Blazor component tests (see [Tests](#tests)) |
 
 The Client project has no reference to the Server project or EF Core, so the UI *cannot* access the database directly — the "UI goes through the API" rule is enforced by the project graph.
+
+## Tests
+
+`dotnet test` runs 98 tests (159 cases, because a `[Theory]` runs once per row of test data) in about 2 seconds once built. Nothing else needs to be installed or running.
+
+| Folder | What it covers | How |
+|---|---|---|
+| `Unit/` | Validation rules and their edge cases, input normalization, phone formatting while typing, state filtering, table sorting, and the combined Name/Address text | Plain xUnit; no web server or database |
+| `Integration/` | Every endpoint and status code, nested addresses, duplicate email in any letter case, cascade delete, problem details errors, Swagger | `WebApplicationFactory` runs the real app in memory, with migrations and seed data, against its own temporary SQLite file that is deleted afterwards, so `employees.db` is never touched |
+| `Components/` | The add form (separate fields, required and phone messages, a 409 shown under Email, server unreachable) and the employee table | bUnit renders the Blazor components without a browser; a fake `HttpMessageHandler` stands in for the API |
+
+Each test is tagged with the requirement it checks, for example `[Trait("Requirement", "R-04")]`, so you can run one area at a time: `dotnet test --filter "Requirement=R-17"` runs only the phone-formatting tests. A tag on a test class applies to all of its tests, so `EmployeeRequestValidatorTests`, which covers every field rule, carries R-02 to R-09 and R-28.
+
+| ID | Requirement |
+|---|---|
+| R-01 | List all employees |
+| R-02 | First and last name required |
+| R-03 | Email required and unique (in any letter case) |
+| R-04 | Phone required, in `(XXX)-XXX-XXXX` format |
+| R-05 | Address 1 required |
+| R-06 | Address 2 optional |
+| R-07 | City required |
+| R-08 | State is a 2-letter US code |
+| R-09 | ZIP is 5 digits |
+| R-10 | Seed data (3 to 5 employees) and input normalization |
+| R-11 | Address nested in create, update and get; delete removes it too |
+| R-12 | Status codes |
+| R-13 | OpenAPI / Swagger |
+| R-14 | Problem details errors |
+| R-15 | Table columns and combined values |
+| R-16 | Table sorting |
+| R-17 | Phone number formats while typing |
+| R-18 | State picker |
+| R-19 | Add form fields and error messages |
+| R-28 | Date of birth (replaces age) and its valid range |
+
+R-20 to R-27 were checked by reading the code or running the app rather than by automated tests: dependency injection, the mix of unit and integration tests, the README and AI_USAGE documents, a fresh-clone run, one host for API and UI, the UI using only the API, and the database being created by Code First at startup.
 
 ## Architecture overview
 
@@ -62,7 +99,7 @@ TODO
 - **One request type for create and update.** POST and PUT take the same fields; PUT gets the employee id from the URL, so a separate `UpdateEmployeeRequest` would be an identical copy.
 - **Validation rules live once, in Contracts** (DataAnnotations attributes), so the form and the API enforce the same rules. `EmployeeRequestValidator` runs them, including the nested address, because .NET's built-in `Validator` doesn't descend into nested objects. Errors come back keyed by field (`Email`, `Address.Zip`), the shape ASP.NET Core uses for a 400 validation response.
 - **Validation details:** phone and ZIP use `[0-9]` rather than `\d` (in .NET, `\d` also matches non-ASCII digits); state must be one of the 50 state codes or DC, accepted in any case; date of birth must be between 1900-01-01 and today; email uses .NET's `[EmailAddress]` check, which is deliberately loose.
-- **Minimal APIs** in a feature folder (`Server/Employees/`) rather than MVC controllers: less ceremony for five endpoints. Handlers return `TypedResults` with `Results<...>` return types, so every possible status code is part of the method signature and appears in Swagger automatically.
+- **Minimal APIs** in a feature folder (`Server/Employees/`) rather than MVC controllers: less ceremony for five endpoints. Handlers return `TypedResults` with `Results<...>` return types, so Swagger reads most status codes from the method signature. 404 and 409 are sent with `TypedResults.Problem`, so they use the `application/problem+json` media type like the 400s; that result type doesn't carry a status code, so those routes list theirs with `.ProducesProblem(...)`.
 - **Thin endpoints, rules in `EmployeeService`.** The endpoints only translate between HTTP and an `IEmployeeService` (registered in DI as scoped, like the `DbContext`). The service returns an outcome (`Success`, `ValidationFailed`, `NotFound`, `DuplicateEmail`) and knows nothing about HTTP, so it can be unit-tested directly.
 - **Input is normalized before validation:** fields are trimmed, State is uppercased and a blank Address 2 becomes null. So `"  "` counts as missing, and `" tx"` is stored as `TX`.
 - **Duplicate email gets two checks:** a query before saving gives a clean 409, and if two requests race past it, the unique index rejects the second insert, which is also mapped to 409.
@@ -92,4 +129,5 @@ TODO
 
 ## What I'd improve with more time
 
-TODO
+- Browser end-to-end tests (Playwright) in the repo. The browser checks used during development ran from a throwaway environment outside the repo, so `dotnet test` doesn't need a browser installed.
+- TODO
