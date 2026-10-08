@@ -1,0 +1,29 @@
+@* Column header with a sort button. aria-sort tells screen readers which column is sorted and how. *@
+<th scope="col" aria-sort="@AriaSort">
+    <button type="button" class="zl-sort-button" @onclick="() => OnSort.InvokeAsync(Column)">
+        @Label
+        <Icon Name="SortIcon" Size="14" />
+    </button>
+</th>
+
+@code {
+    [Parameter, EditorRequired]
+    public EmployeeSortColumn Column { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public EmployeeSort Sort { get; set; }
+
+    [Parameter]
+    public EventCallback<EmployeeSortColumn> OnSort { get; set; }
+
+    private bool IsSorted => Sort.Column == Column;
+
+    private string? AriaSort => !IsSorted ? null
+        : Sort.Direction == SortDirection.Ascending ? "ascending" : "descending";
+
+    private IconName SortIcon => !IsSorted ? IconName.SortNeutral
+        : Sort.Direction == SortDirection.Ascending ? IconName.ArrowUp : IconName.ArrowDown;
+}

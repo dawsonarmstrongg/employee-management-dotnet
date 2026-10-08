@@ -4,20 +4,56 @@
 
 .state-options {
     position: absolute;
-    z-index: 1000;
+    z-index: var(--zelis-z-dropdown);
     top: 100%;
     left: 0;
     min-width: 14rem;
     max-height: 15rem;
-    margin-top: 2px;
+    margin: var(--zelis-space-1) 0 0;
+    padding: var(--zelis-space-1);
     overflow-y: auto;
+    list-style: none;
+    background: var(--zelis-white);
+    border: 1px solid var(--zelis-border-strong);
+    border-radius: var(--zelis-radius-button);
+    box-shadow: var(--zelis-shadow-overlay);
 }
 
-.state-options .list-group-item {
+/* Not enough room below the field (set by InputUsState.razor.js). */
+.state-picker[data-placement="top"] .state-options {
+    top: auto;
+    bottom: 100%;
+    margin: 0 0 var(--zelis-space-1);
+}
+
+.state-option {
+    display: flex;
+    align-items: baseline;
+    gap: var(--zelis-space-2);
+    padding: var(--zelis-space-2) var(--zelis-space-3);
+    color: var(--zelis-text-primary);
     cursor: pointer;
-    padding: 0.35rem 0.75rem;
+    border-radius: var(--zelis-radius-control);
+}
+
+.state-option:hover {
+    background: var(--zelis-tint-hover);
+}
+
+.state-option.is-active {
+    color: var(--zelis-white);
+    background: var(--zelis-ink-blue);
+}
+
+.state-code {
+    min-width: 1.75rem;
+    font-weight: var(--zelis-font-weight-semibold);
 }
 
 .state-name {
-    opacity: 0.75;
+    color: var(--zelis-text-secondary);
+}
+
+.state-option.is-active .state-name {
+    color: inherit;
 }

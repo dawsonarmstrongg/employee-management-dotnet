@@ -1,59 +1,202 @@
 @page "/"
+@using System.Globalization
 @inject EmployeeApiClient Api
+@inject ToastService Toasts
 
-<PageTitle>Employees</PageTitle>
+<PageTitle>Employees · Employee Management</PageTitle>
 
-<h1>Employees</h1>
+<PageHeader Title="Employees" Description="Review employee contact details and add new employees.">
+    <Meta>
+        @if (lastUpdated is { } updated)
+        {
+            <span>
+                Updated
+                <time datetime="@updated.ToString("O", CultureInfo.InvariantCulture)">@updated.ToString("h:mm tt", CultureInfo.InvariantCulture)</time>
+            </span>
+        }
+        else
+        {
+            <span>@(loadFailed ? "Not loaded" : "Loading…")</span>
+        }
+    </Meta>
+    <Actions>
+        @* aria-disabled rather than disabled while refreshing, so keyboard focus stays on the button. *@
+        <button type="button" class="btn btn-secondary" disabled="@(employees is null)"
+                aria-disabled="@(refreshing ? "true" : null)" @onclick="RefreshAsync">
+            @if (refreshing)
+            {
+                <span class="zl-spinner zl-spinner--sm" aria-hidden="true"></span>
+                <span>Refreshing…</span>
+            }
+            else
+            {
+                <Icon Name="IconName.Refresh" />
+                <span>Refresh</span>
+            }
+        </button>
+        <button type="button" class="btn btn-primary" @onclick="OpenAddDrawer">
+            <Icon Name="IconName.Plus" />
+            <span>Add employee</span>
+        </button>
+    </Actions>
+</PageHeader>
 
-@if (loadError is not null)
-{
-    <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
-        <span>@loadError</span>
-        <button class="btn btn-outline-danger btn-sm" @onclick="LoadAsync">Try again</button>
+<section class="zl-card">
+    <div class="zl-card__header">
+        <h2 class="zl-card__title">
+            All employees
+            @if (employees is not null)
+            {
+                <span class="zl-count"><span class="visually-hidden">(</span>@employees.Count<span class="visually-hidden"> total)</span></span>
+            }
+        </h2>
     </div>
-}
-else if (employees is null)
-{
-    <p><em>Loading employees...</em></p>
-}
-else
-{
-    <EmployeeTable Employees="employees" />
-}
 
-<h2 class="h4 mt-5 mb-3">Add employee</h2>
-<AddEmployeeForm OnCreated="HandleCreated" />
+    @if (employees is null && loadFailed)
+    {
+        <EmptyState Icon="IconName.ErrorCircle" Tone="Tone.Error" Title="Couldn't load employees"
+                    Message="Check that the server is running, then try again.">
+            <button type="button" class="btn btn-secondary" @onclick="LoadAsync">
+                <Icon Name="IconName.Refresh" />
+                <span>Try again</span>
+            </button>
+        </EmptyState>
+    }
+    else if (employees is null)
+    {
+        <TableSkeleton Columns="SkeletonColumns" Label="Loading employees" />
+    }
+    else if (employees.Count == 0)
+    {
+        <EmptyState Icon="IconName.Users" Title="No employees yet" Message="Employees you add will appear here.">
+            <button type="button" class="btn btn-secondary" @onclick="OpenAddDrawer">
+                <Icon Name="IconName.Plus" />
+                <span>Add employee</span>
+            </button>
+        </EmptyState>
+    }
+    else
+    {
+        <EmployeeTable Employees="employees" NewIds="newIds" />
+    }
+</section>
+
+<Drawer Open="addOpen" Title="Add employee" Description="Enter the new employee's details."
+        OnCloseRequested="RequestCloseAddDrawer">
+    <AddEmployeeForm @ref="addForm" OnCreated="HandleCreatedAsync" OnCancel="RequestCloseAddDrawer" />
+</Drawer>
+
+<ConfirmDialog Open="confirmDiscardOpen" Title="Discard this employee?"
+               Message="The details you entered haven't been saved. If you close the form now, they'll be lost."
+               ConfirmText="Discard" CancelText="Keep editing" Destructive="true"
+               OnConfirm="DiscardChanges" OnCancel="KeepEditing" OnClosed="HandleConfirmClosed" />
 
 @code {
+    private static readonly string[] SkeletonColumns = ["Name", "Email", "Phone", "Date of birth", "Address"];
+
+    private readonly HashSet<int> newIds = [];
     private List<EmployeeDto>? employees;
-    private string? loadError;
+    private bool loadFailed;
+    private bool refreshing;
+    private DateTimeOffset? lastUpdated;
+    private bool addOpen;
+    private bool confirmDiscardOpen;
+    private bool discardPending;
+    private AddEmployeeForm? addForm;
 
     protected override Task OnInitializedAsync() => LoadAsync();
 
     private async Task LoadAsync()
     {
-        loadError = null;
+        loadFailed = false;
         employees = null;
         try
         {
             employees = [.. await Api.GetAllAsync()];
+            lastUpdated = DateTimeOffset.Now;
         }
         catch (HttpRequestException)
         {
-            loadError = "Could not load employees. Check that the server is running.";
+            loadFailed = true;
         }
     }
 
-    // Add the new employee locally (same order as the API) instead of reloading the whole list.
-    private void HandleCreated(EmployeeDto employee)
+    // Reloads in place: the current list stays visible, and a failure is reported without losing it.
+    private async Task RefreshAsync()
     {
-        if (employees is null)
+        if (refreshing)
         {
             return;
         }
 
-        employees = [.. employees.Append(employee)
-            .OrderBy(e => e.LastName, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(e => e.FirstName, StringComparer.OrdinalIgnoreCase)];
+        refreshing = true;
+        try
+        {
+            employees = [.. await Api.GetAllAsync()];
+            lastUpdated = DateTimeOffset.Now;
+        }
+        catch (HttpRequestException)
+        {
+            Toasts.Show(Tone.Error, "Couldn't refresh employees. Check that the server is running.");
+        }
+        finally
+        {
+            refreshing = false;
+        }
+    }
+
+    private void OpenAddDrawer() => addOpen = true;
+
+    // Escape, the backdrop, the X button and Cancel all come here. Unsaved input is confirmed first.
+    private void RequestCloseAddDrawer()
+    {
+        if (addForm?.IsSaving == true)
+        {
+            return;
+        }
+
+        if (addForm?.HasChanges == true)
+        {
+            confirmDiscardOpen = true;
+        }
+        else
+        {
+            addOpen = false;
+        }
+    }
+
+    // Close the confirmation first and the drawer after it, so focus returns to "Add employee".
+    private void DiscardChanges()
+    {
+        discardPending = true;
+        confirmDiscardOpen = false;
+    }
+
+    private void KeepEditing() => confirmDiscardOpen = false;
+
+    private void HandleConfirmClosed()
+    {
+        if (discardPending)
+        {
+            discardPending = false;
+            addOpen = false;
+        }
+    }
+
+    // Add the new employee locally instead of reloading the list; the table keeps its sort order.
+    private async Task HandleCreatedAsync(EmployeeDto employee)
+    {
+        addOpen = false;
+        newIds.Add(employee.Id);
+        Toasts.Show(Tone.Success, $"{EmployeeDisplay.FullName(employee)} was added.");
+
+        if (employees is null)
+        {
+            await LoadAsync();
+        }
+        else
+        {
+            employees.Add(employee);
+        }
     }
 }

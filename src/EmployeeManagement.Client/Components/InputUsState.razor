@@ -26,7 +26,7 @@
 
     @if (ShowList)
     {
-        <ul id="@listId" role="listbox" class="list-group state-options shadow">
+        <ul id="@listId" role="listbox" class="state-options">
             @for (var i = 0; i < matches.Count; i++)
             {
                 var state = matches[i];
@@ -34,10 +34,11 @@
                 <li id="@OptionId(state)"
                     role="option"
                     aria-selected="@(isActive ? "true" : "false")"
-                    class="list-group-item list-group-item-action @(isActive ? "active" : null)"
+                    class="state-option @(isActive ? "is-active" : null)"
                     @onmousedown="() => Select(state)"
                     @onmousedown:preventDefault="true">
-                    <strong>@state.Code</strong> <span class="state-name">@state.Name</span>
+                    <span class="state-code">@state.Code</span>
+                    <span class="state-name">@state.Name</span>
                 </li>
             }
         </ul>
