@@ -14,7 +14,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
-// RFC 7807 problem+json bodies for API errors; OpenAPI document served at /openapi/v1.json.
+// RFC 9457 problem+json bodies for API errors; OpenAPI document served at /openapi/v1.json.
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 

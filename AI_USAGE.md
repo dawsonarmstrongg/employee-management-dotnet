@@ -22,7 +22,7 @@
 | 11 | Turn the State field into a dropdown that filters as I type the 2-letter code. | `InputUsState` combobox, shared `UsStates` list in Contracts (also used by `[UsState]`) and `UsStateFilter`. Tested in a browser: focus lists 51 options; `T` → TN, TX; `TE` matches by name; arrow keys + Enter select without submitting the form; click and Escape work; digits are stripped and lowercase is uppercased; `ZZ` shows the error, which clears on `TX`; a saved employee stores `TX` and the form resets. |
 | 12 | Apply my Zelis "Lumen" design brief to the whole app (summarized [below](#ui-design-prompt-summary)). Before building I narrowed it: sorting only, keep the Date of birth column, sort Name by last name and show it "Last, First". | One token file and theme, a shared component set in `Components/UI/` (11 components), a new app shell, and a redesigned employees page (sortable table, add form in a drawer with a discard check, toasts, loading/empty/error states), plus redesigned Not Found and error pages. No business logic, API calls or validation rules changed. Verified with a Playwright script in headless Edge at desktop, tablet and phone widths (85 checks: sizes and colors, sorting, keyboard and focus, validation, the 409, phone/state inputs, saving, every page state), axe-core (0 WCAG 2.2 AA violations on every page and state), and a review of every screenshot. |
 | 13 | Write a Lead QA Tester prompt and give it, with the exercise document, to a separate Sonnet sub-agent with fresh context. It may change only test files (summarized [below](#qa-sub-agent-summary)). | 98 tests (159 cases) across unit, API integration and Blazor component (bUnit) tests, each tagged with the requirement it checks, plus exploratory API, browser and accessibility checks and a written report. 158 passed and 1 failed on purpose, exposing a real inconsistency: 404 and 409 errors were sent as `application/json`. I checked every finding before acting on it: one was confirmed and fixed, one was a false alarm, and my review of the new tests found two more problems (see the corrections below). All 159 now pass. |
-| | TODO — add more as work progresses | |
+| 14 | Test a fresh clone of the repo, following only the README, to confirm it runs as-is. | Cloned the repo from GitHub into an empty folder and ran restore, build, test and run exactly as the README says: 0 warnings, 159/159 tests passed, the database was created and seeded with 5 employees, and the page, Swagger and API all responded with no browser console errors. |
 
 ## UI design prompt (summary)
 
@@ -63,7 +63,7 @@ For an independent test pass I wrote a "Lead QA Tester" prompt and ran it as a s
 - Driving the `dotnet` CLI for scaffolding and wiring references/packages.
 - Turning a long design brief into a token file, a theme and reusable components, then checking the result with scripted browser and accessibility tests at three screen sizes.
 - An independent test pass: a sub-agent with fresh context turned the brief into requirement-tagged tests and found a real inconsistency in the API's error responses.
-- TODO
+- Learning as I built. This is my first web app, so I asked the AI to explain each piece in plain language before moving on: how a request reaches the API and where its status code comes from, what Playwright is and how it differs from the tests in the repo, and a guided walkthrough of the code. Asking how status codes are decided is what exposed the routing 404/405 gap listed below.
 
 ## Where AI output needed correction
 
@@ -83,11 +83,11 @@ For an independent test pass I wrote a "Lead QA Tester" prompt and ran it as a s
 - **Test cleanup that silently failed:** the QA sub-agent's test setup deleted its temporary database after each test class, but SQLite's connection pool still had the file open, so the delete failed without an error and every run left 5 files in `%TEMP%`. Fixed by turning off pooling in the tests' connection string (`Pooling=False`); a run now leaves nothing behind.
 - **Wrong requirement tags:** the QA sub-agent labeled some tests with requirement IDs that didn't match its own list (duplicate-email tests marked as the phone requirement, add-form tests as Swagger, delete tests as seed data). Found while documenting the `--filter` option; corrected the tags and re-ran the filter for every ID.
 - **Sub-agent stopped by my own chat messages:** the first two QA runs were started in the background and stopped partway, with no error, shortly after I sent a new chat message; the CLI cancelled the background sub-agent when the new message arrived. The third run was started in the foreground with a handover note describing the partial work, and finished.
-- TODO
 
 ## How I reviewed and tested AI-generated code
 
 - Read every diff before committing.
-- Built after each step. Since the QA pass, `dotnet test` (159 cases) must pass before a commit. Checked in Swagger that every endpoint lists its status codes. TODO — manual UI checks.
+- Built after each step. Since the QA pass, `dotnet test` (159 cases) must pass before a commit. Checked in Swagger that every endpoint lists its status codes, and ran the app myself (F5 in VS Code) to try each feature by hand.
 - Independent QA pass by a separate sub-agent (above). I treated its report as claims to check, not facts: I reproduced each finding before changing anything, which caught one false alarm.
+- Before submitting: a fresh clone from GitHub run exactly as the README describes, and a CI workflow that builds and tests on Ubuntu and Windows for every push.
 - UI redesign: scripted browser checks (Playwright, headless Edge) at desktop, tablet and phone widths, axe-core accessibility scans, and a look at every screenshot. The screenshots caught six layout bugs that the scripted checks and axe missed (listed above).

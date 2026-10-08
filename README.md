@@ -1,8 +1,19 @@
 # Employee Management
 
-Employee management app built with .NET 10, ASP.NET Core Web API, Blazor WebAssembly, EF Core (Code First) and SQLite.
+[![Build and test](https://github.com/dawsonarmstrongg/employee-management-dotnet/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/dawsonarmstrongg/employee-management-dotnet/actions/workflows/build-and-test.yml)
 
-> Work in progress — sections marked TODO are filled in as features land.
+Employee management app built with .NET 10, ASP.NET Core Web API, Blazor WebAssembly, EF Core (Code First) and SQLite. A REST API (documented with Swagger) lists, creates, updates and deletes employees and their addresses; a Blazor page shows the employees in a table and adds new ones with field-level validation.
+
+Quick start: `dotnet run --project src/EmployeeManagement.Server`, then open `http://localhost:5233`. The database is created and seeded on first run.
+
+![Employee table](docs/images/employees-table.png)
+
+<details>
+<summary>Add employee form</summary>
+
+![Add employee form](docs/images/add-employee-form.png)
+
+</details>
 
 ## Prerequisites
 
@@ -84,7 +95,33 @@ R-20 to R-27 were checked by reading the code or running the app rather than by 
 
 ## Architecture overview
 
-TODO
+One ASP.NET Core host (`Server`) serves both the REST API and the Blazor WebAssembly files. The UI runs in the browser and reaches the data only through the API.
+
+```text
+Browser: Blazor WebAssembly (Client)
+  Employees page ─ EmployeeTable / AddEmployeeForm
+        │  EmployeeApiClient (HttpClient, JSON)
+        ▼
+ASP.NET Core host (Server)
+  EmployeeEndpoints   Minimal API: HTTP in, status code out
+        ▼
+  EmployeeService     normalize, validate, duplicate email, save (via IEmployeeService, DI)
+        ▼
+  AppDbContext        EF Core Code First
+        ▼
+  SQLite: employees.db (created, migrated and seeded at startup)
+
+Contracts (shared by Client and Server): request/response types, validation rules, US states
+```
+
+Adding an employee, end to end:
+
+1. The form runs the shared validation rules and shows any errors without calling the API.
+2. `EmployeeApiClient` POSTs the request as JSON to `/api/employees`.
+3. The endpoint passes it to `EmployeeService`, which normalizes it, runs the same validation and checks for a duplicate email.
+4. The service saves the employee and address through EF Core and returns an outcome.
+5. The endpoint turns that outcome into an HTTP response: 201, 400 (errors per field), or 409 (problem details).
+6. The client adds the new employee to the table, or shows the errors next to the matching fields.
 
 ## Assumptions and technical decisions
 
@@ -121,13 +158,21 @@ TODO
 - **Static error page.** The server's `/Error` page is excluded from interactive routing (`[ExcludeFromInteractiveRouting]`) so it renders as plain HTML. Before, the WebAssembly router took over every page, so the error page could never appear.
 - **Not built from the design brief:** dashboard cards, charts, tabs, breadcrumbs and overflow menus (a single page with one set of actions doesn't need them). There's no official Zelis logo file in the repo, so the header shows the app name and has an optional `LogoSrc` parameter for a real logo rather than a redrawn one. Avenir Next is a licensed font and isn't included; browsers without it use Segoe UI or Arial.
 - **Pinned package versions** (no `10.*` wildcards) so a fresh clone restores exactly what was tested.
-- TODO
+- **Continuous integration:** a GitHub Actions workflow (`.github/workflows/build-and-test.yml`) restores, builds and runs every test on Ubuntu and Windows for each push and pull request.
 
 ## Incomplete requirements
 
-TODO
+Every requirement in the brief is implemented. Deliberate differences from the brief:
+
+- **Date of birth instead of age** on the form and in the database (see the decisions above for why).
+- **The table shows a fifth column, Date of birth**, so the value from the form is visible after saving. The brief lists four columns; the column is easy to remove if that list is meant strictly.
+- **No edit or delete screens in the UI.** The brief says they aren't required; update and delete are available in the API and can be tried in Swagger.
 
 ## What I'd improve with more time
 
 - Browser end-to-end tests (Playwright) in the repo. The browser checks used during development ran from a throwaway environment outside the repo, so `dotnet test` doesn't need a browser installed.
-- TODO
+- Edit and delete screens in the UI, using the API endpoints that already exist.
+- Optimistic concurrency: today two people editing the same employee means the last save wins. A row version column would return 409 to the second save instead.
+- Server-side search, filtering and paging, once the list is too long to load at once (out of scope for this exercise).
+- Authentication and authorization (also out of scope), plus health checks and structured logging for running it in production.
+- Unicode-aware email uniqueness: SQLite's `NOCASE` only compares A–Z case-insensitively, so two addresses that differ only in the case of a non-ASCII letter would both be accepted.

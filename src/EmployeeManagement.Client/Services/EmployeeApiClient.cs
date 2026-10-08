@@ -53,7 +53,7 @@ public sealed class EmployeeApiClient(HttpClient http)
         }
     }
 
-    // The fields of an RFC 7807 problem details response that the UI uses.
+    // The fields of an RFC 9457 problem details response that the UI uses.
     private sealed record ApiProblem(string? Title, string? Detail, Dictionary<string, string[]>? Errors);
 }
 
