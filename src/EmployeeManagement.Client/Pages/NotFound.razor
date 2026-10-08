@@ -1,5 +1,14 @@
-﻿@page "/not-found"
+@page "/not-found"
 @layout MainLayout
 
-<h3>Not Found</h3>
-<p>Sorry, the content you are looking for does not exist.</p>
+<PageTitle>Page not found · Employee Management</PageTitle>
+
+<section class="zl-card">
+    <EmptyState Icon="IconName.Compass" HeadingLevel="1" Title="Page not found"
+                Message="The page you're looking for doesn't exist or may have moved.">
+        <a class="btn btn-primary" href="">
+            <Icon Name="IconName.ArrowLeft" />
+            <span>Back to employees</span>
+        </a>
+    </EmptyState>
+</section>

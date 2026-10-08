@@ -1,21 +1,49 @@
 @inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@* A plain onclick so the skip link also works on the static (non-interactive) error page. *@
+<button type="button" class="zl-skip-link" onclick="document.getElementById('main-content').focus()">
+    Skip to main content
+</button>
 
-    <main>
-
-
-        <article class="content px-4">
-            @Body
-        </article>
+<div class="zl-shell">
+    <AppHeader @ref="header" NavOpen="navOpen" OnToggleNav="ToggleNav" />
+    <NavMenu Open="navOpen" OnClose="CloseNavAsync" OnLeave="CollapseNav" />
+    <main id="main-content" class="zl-main" tabindex="-1">
+        @Body
     </main>
 </div>
 
+@if (RendererInfo.IsInteractive)
+{
+    <ToastHost />
+}
+
+@* Blazor shows this bar when an unhandled error reaches the renderer; .reload and .dismiss are wired by blazor.web.js. *@
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <div class="zl-error-bar" role="alert">
+        <Icon Name="IconName.ErrorCircle" />
+        <p class="zl-error-bar__message">Something went wrong. Reload the page to continue.</p>
+        <a href="." class="reload btn btn-secondary btn-sm">Reload</a>
+        <button type="button" class="dismiss btn btn-tertiary btn-icon btn-sm" aria-label="Dismiss">
+            <Icon Name="IconName.Close" Size="16" />
+        </button>
+    </div>
 </div>
+
+@code {
+    private AppHeader header = default!;
+    private bool navOpen;
+
+    private void ToggleNav() => navOpen = !navOpen;
+
+    // Closed with the close button, Escape or the backdrop: return focus to the menu button.
+    private async Task CloseNavAsync()
+    {
+        navOpen = false;
+        StateHasChanged();
+        await header.FocusNavToggleAsync();
+    }
+
+    // Closed because the user followed a link or tabbed out: leave focus where it is.
+    private void CollapseNav() => navOpen = false;
+}

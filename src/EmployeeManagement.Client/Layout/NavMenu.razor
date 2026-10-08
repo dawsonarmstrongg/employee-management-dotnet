@@ -1,17 +1,89 @@
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Employee Management</a>
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<nav @ref="navElement" id="app-nav" class="zl-nav @(Open ? "is-open" : null)" aria-label="Main" @onkeydown="HandleKeyDown">
+    <div class="zl-nav__mobile-header">
+        <span class="zl-nav__mobile-title">Menu</span>
+        <button @ref="closeButton" type="button" class="btn btn-tertiary btn-icon" aria-label="Close menu" @onclick="OnClose">
+            <Icon Name="IconName.Close" />
+        </button>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Employees
+    <ul class="zl-nav__list">
+        <li @onclick="OnLeave">
+            <NavLink class="zl-nav__link" href="" Match="NavLinkMatch.All" data-tooltip="Employees" data-tooltip-placement="right">
+                <Icon Name="IconName.Users" />
+                <span class="zl-nav__label">Employees</span>
             </NavLink>
-        </div>
-    </nav>
-</div>
+        </li>
+    </ul>
+</nav>
+@if (Open)
+{
+    <div class="zl-nav-scrim" @onclick="OnClose"></div>
+}
+
+@code {
+    private ElementReference navElement;
+    private ElementReference closeButton;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<NavMenu>? selfReference;
+    private bool wasOpen;
+
+    // Only used on small screens, where the navigation is an off-canvas panel.
+    [Parameter]
+    public bool Open { get; set; }
+
+    // The user closed the panel (close button, Escape or the backdrop).
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    // The user moved on (followed a link or tabbed out of the panel).
+    [Parameter]
+    public EventCallback OnLeave { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Layout/NavMenu.razor.js");
+            selfReference = DotNetObjectReference.Create(this);
+            await module.InvokeVoidAsync("init", navElement, selfReference);
+        }
+
+        if (Open && !wasOpen)
+        {
+            await closeButton.FocusAsync();
+        }
+
+        wasOpen = Open;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (Open && e.Key == "Escape")
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    [JSInvokable]
+    public Task Collapse() => OnLeave.InvokeAsync();
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            try
+            {
+                await module.InvokeVoidAsync("dispose", navElement);
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // The page is unloading; nothing to clean up.
+            }
+        }
+
+        selfReference?.Dispose();
+    }
+}

@@ -1,0 +1,34 @@
+<header class="zl-app-header">
+    @if (RendererInfo.IsInteractive)
+    {
+        <button @ref="navToggle" type="button" class="zl-header-button" aria-label="Main menu" aria-controls="app-nav"
+                aria-expanded="@(NavOpen ? "true" : "false")" @onclick="OnToggleNav">
+            <Icon Name="IconName.Menu" />
+        </button>
+    }
+    <a class="zl-brand" href="">
+        @if (LogoSrc is not null)
+        {
+            <img class="zl-brand__logo" src="@LogoSrc" alt="Zelis" />
+            <span class="zl-brand__divider" aria-hidden="true"></span>
+        }
+        <span class="zl-brand__name">Employee Management</span>
+    </a>
+</header>
+
+@code {
+    private ElementReference navToggle;
+
+    [Parameter]
+    public bool NavOpen { get; set; }
+
+    [Parameter]
+    public EventCallback OnToggleNav { get; set; }
+
+    // Path to an approved Zelis logo file. The repo has none, so the header shows the app name only.
+    // Never redraw, recolor or imitate the logo.
+    [Parameter]
+    public string? LogoSrc { get; set; }
+
+    public ValueTask FocusNavToggleAsync() => navToggle.FocusAsync();
+}

@@ -7,21 +7,38 @@
     <base href="/" />
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
-    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["css/zelis-tokens.css"]" />
+    <link rel="stylesheet" href="@Assets["css/zelis-theme.css"]" />
     <link rel="stylesheet" href="@Assets["EmployeeManagement.Server.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet @rendermode="renderMode" />
+    <HeadOutlet @rendermode="PageRenderMode" />
 </head>
 
 <body>
-    <Routes @rendermode="renderMode" />
+    @* Shown until the WebAssembly app starts; the theme hides it once the app shell renders. *@
+    <div class="zl-boot">
+        <div class="zl-boot__bar"></div>
+        <div class="zl-boot__body" role="status">
+            <span class="zl-spinner" aria-hidden="true"></span>
+            <span>Loading Employee Management…</span>
+        </div>
+    </div>
+    <Routes @rendermode="PageRenderMode" />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
 </html>
 
 @code {
-    // No prerendering: the UI runs only in the browser and gets all data from the API.
-    private static readonly IComponentRenderMode renderMode = new InteractiveWebAssemblyRenderMode(prerender: false);
+    private static readonly IComponentRenderMode InteractiveWithoutPrerender = new InteractiveWebAssemblyRenderMode(prerender: false);
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    // Pages run in the browser (WebAssembly, no prerendering) and get all data from the API.
+    // The server error page opts out with [ExcludeFromInteractiveRouting] and renders as static HTML,
+    // so it still works when the client app can't.
+    private IComponentRenderMode? PageRenderMode =>
+        HttpContext.AcceptsInteractiveRouting() ? InteractiveWithoutPrerender : null;
 }

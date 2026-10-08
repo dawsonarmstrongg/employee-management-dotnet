@@ -1,0 +1,86 @@
+/* Flat Ink Blue application bar with white text. */
+.zl-app-header {
+    grid-area: header;
+    position: sticky;
+    top: 0;
+    z-index: var(--zelis-z-header);
+    display: flex;
+    align-items: center;
+    gap: var(--zelis-space-2);
+    height: var(--zelis-header-height);
+    padding: 0 var(--zelis-space-5);
+    color: var(--zelis-text-on-dark);
+    background: var(--zelis-ink-blue);
+}
+
+.zl-header-button {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--zelis-touch-target);
+    height: var(--zelis-touch-target);
+    margin-left: calc(-1 * var(--zelis-space-2));
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-radius: var(--zelis-radius-button);
+    transition: background-color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+.zl-header-button:hover {
+    background: var(--zelis-tint-on-dark-hover);
+}
+
+.zl-header-button:active {
+    background: var(--zelis-tint-on-dark-pressed);
+}
+
+.zl-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--zelis-space-3);
+    min-height: var(--zelis-touch-target);
+    margin-left: calc(-1 * var(--zelis-space-2));
+    padding: 0 var(--zelis-space-2);
+    font-size: var(--zelis-font-size-card-title);
+    font-weight: var(--zelis-font-weight-semibold);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--zelis-radius-button);
+    transition: background-color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+.zl-brand:hover {
+    color: inherit;
+    background: var(--zelis-tint-on-dark-hover);
+}
+
+.zl-brand__logo {
+    display: block;
+    width: auto;
+    height: 28px;
+}
+
+.zl-brand__divider {
+    width: 1px;
+    height: 24px;
+    background: var(--zelis-divider-on-dark);
+}
+
+/* The standard Ink Blue ring would vanish on the Ink Blue bar, so the header uses the on-dark ring. */
+.zl-header-button:focus-visible,
+.zl-brand:focus-visible {
+    outline: var(--zelis-focus-ring-on-dark);
+    outline-offset: var(--zelis-focus-ring-offset);
+}
+
+@media (max-width: 767.98px) {
+    .zl-app-header {
+        padding: 0 var(--zelis-space-4);
+    }
+
+    .zl-header-button {
+        display: inline-flex;
+    }
+}
