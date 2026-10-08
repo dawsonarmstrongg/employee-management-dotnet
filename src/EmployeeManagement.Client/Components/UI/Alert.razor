@@ -1,0 +1,32 @@
+@* Inline message. Errors and warnings use role="alert" so screen readers announce them immediately. *@
+<div class="zl-alert zl-alert--@ToneStyles.CssSuffix(Tone)" role="@(Tone is Tone.Error or Tone.Warning ? "alert" : "status")">
+    <Icon Name="ToneStyles.Icon(Tone)" Class="zl-alert__icon" />
+    <div class="zl-alert__body">
+        @if (Title is not null)
+        {
+            <p class="zl-alert__title">@Title</p>
+        }
+        @if (ChildContent is not null)
+        {
+            <div class="zl-alert__message">@ChildContent</div>
+        }
+    </div>
+    @if (Actions is not null)
+    {
+        <div class="zl-alert__actions">@Actions</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Tone Tone { get; set; } = Tone.Info;
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? Actions { get; set; }
+}

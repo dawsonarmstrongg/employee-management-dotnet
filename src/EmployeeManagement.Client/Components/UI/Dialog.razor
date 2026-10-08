@@ -1,0 +1,96 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@* A native <dialog> opened with showModal(): the browser traps focus, makes the page behind it inert and
+   puts it in the top layer. The parent owns the Open state; Escape, the backdrop and close buttons only
+   *request* a close (OnCloseRequested), so the parent can ask "discard changes?" first. *@
+<dialog @ref="element" class="zl-dialog @Class" @attributes="AdditionalAttributes">
+    @if (Open || isShown)
+    {
+        @ChildContent
+    }
+</dialog>
+
+@code {
+    private ElementReference element;
+    private IJSObjectReference? module;
+    private DotNetObjectReference<Dialog>? selfReference;
+    private bool isShown;
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    // Escape, a backdrop click or a close button asked to close. The parent decides whether to set Open to false.
+    [Parameter]
+    public EventCallback OnCloseRequested { get; set; }
+
+    // The dialog has finished closing (focus is back on the page).
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./Components/UI/Dialog.razor.js");
+            selfReference = DotNetObjectReference.Create(this);
+            await module.InvokeVoidAsync("init", element, selfReference);
+        }
+
+        if (module is null || Open == isShown)
+        {
+            return;
+        }
+
+        isShown = Open;
+        if (Open)
+        {
+            await module.InvokeVoidAsync("show", element);
+        }
+        else
+        {
+            await module.InvokeVoidAsync("hide", element);
+            StateHasChanged();
+            await OnClosed.InvokeAsync();
+        }
+    }
+
+    [JSInvokable]
+    public Task RequestClose() => OnCloseRequested.InvokeAsync();
+
+    // The browser closed the dialog without asking (rare). Treat it as a close request; if the parent
+    // keeps Open = true, the next render shows the dialog again.
+    [JSInvokable]
+    public async Task NotifyClosedByBrowser()
+    {
+        isShown = false;
+        await OnCloseRequested.InvokeAsync();
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            try
+            {
+                await module.InvokeVoidAsync("dispose", element);
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+                // The page is unloading; nothing to clean up.
+            }
+        }
+
+        selfReference?.Dispose();
+    }
+}

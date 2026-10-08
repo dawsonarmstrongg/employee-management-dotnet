@@ -1,0 +1,13 @@
+@* Compact status label: text, tone color and icon together, never color alone. *@
+<span class="zl-chip zl-chip--@ToneStyles.CssSuffix(Tone)">
+    <Icon Name="ToneStyles.Icon(Tone)" Size="14" StrokeWidth="2.25" />
+    @Text
+</span>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Text { get; set; } = "";
+
+    [Parameter]
+    public Tone Tone { get; set; } = Tone.Neutral;
+}

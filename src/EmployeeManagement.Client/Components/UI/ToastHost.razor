@@ -1,0 +1,80 @@
+@implements IDisposable
+@inject ToastService Toasts
+@* Visible toasts, plus hidden live regions so screen readers hear each message once (without also
+   reading the dismiss button). Success and info toasts close after a few seconds; errors and warnings
+   stay until dismissed. *@
+<div class="zl-toast-region">
+    @foreach (var toast in Toasts.Messages)
+    {
+        <div @key="toast.Id" class="zl-toast zl-toast--@ToneStyles.CssSuffix(toast.Tone)">
+            <Icon Name="ToneStyles.Icon(toast.Tone)" Class="zl-toast__icon" />
+            <p class="zl-toast__message">@toast.Text</p>
+            <button type="button" class="btn btn-tertiary btn-icon btn-sm" aria-label="Dismiss notification"
+                    @onclick="() => Toasts.Dismiss(toast.Id)">
+                <Icon Name="IconName.Close" Size="16" />
+            </button>
+        </div>
+    }
+</div>
+<div class="visually-hidden" role="status">@politeAnnouncement</div>
+<div class="visually-hidden" role="alert">@urgentAnnouncement</div>
+
+@code {
+    private static readonly TimeSpan AutoDismissDelay = TimeSpan.FromSeconds(6);
+
+    private readonly HashSet<Guid> scheduled = [];
+    private readonly CancellationTokenSource disposed = new();
+    private Guid? lastAnnounced;
+    private string politeAnnouncement = "";
+    private string urgentAnnouncement = "";
+
+    protected override void OnInitialized() => Toasts.Changed += HandleChanged;
+
+    private void HandleChanged()
+    {
+        var latest = Toasts.Messages.Count > 0 ? Toasts.Messages[^1] : null;
+        if (latest is null)
+        {
+            politeAnnouncement = urgentAnnouncement = "";
+        }
+        else if (latest.Id != lastAnnounced)
+        {
+            lastAnnounced = latest.Id;
+            var urgent = latest.Tone is Tone.Error or Tone.Warning;
+            politeAnnouncement = urgent ? "" : latest.Text;
+            urgentAnnouncement = urgent ? latest.Text : "";
+        }
+
+        foreach (var toast in Toasts.Messages)
+        {
+            if (toast.Tone is not (Tone.Error or Tone.Warning) && scheduled.Add(toast.Id))
+            {
+                _ = DismissLaterAsync(toast.Id);
+            }
+        }
+
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DismissLaterAsync(Guid id)
+    {
+        try
+        {
+            await Task.Delay(AutoDismissDelay, disposed.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            return;
+        }
+
+        scheduled.Remove(id);
+        await InvokeAsync(() => Toasts.Dismiss(id));
+    }
+
+    public void Dispose()
+    {
+        Toasts.Changed -= HandleChanged;
+        disposed.Cancel();
+        disposed.Dispose();
+    }
+}

@@ -1,0 +1,63 @@
+@using System.Linq.Expressions
+@typeparam TValue
+@* Label above the control, optional help text, and the field's validation message. The input comes in as
+   ChildContent and uses context.DescribedBy for aria-describedby, so help and errors are read with it. *@
+<div class="zl-field @Class">
+    <label for="@Id" class="form-label">
+        @Label
+        @if (Required)
+        {
+            <span class="zl-required" aria-hidden="true">*</span>
+        }
+        @if (Optional)
+        {
+            <span class="zl-optional">(optional)</span>
+        }
+    </label>
+    @if (ChildContent is not null)
+    {
+        @ChildContent(fieldContext)
+    }
+    @if (Help is not null)
+    {
+        <p id="@HelpId" class="zl-help">@Help</p>
+    }
+    <div id="@ErrorId">
+        <ValidationMessage For="For" />
+    </div>
+</div>
+
+@code {
+    private FormFieldContext fieldContext = default!;
+
+    // The id of the input inside this field.
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public Expression<Func<TValue>> For { get; set; } = default!;
+
+    [Parameter]
+    public bool Required { get; set; }
+
+    [Parameter]
+    public bool Optional { get; set; }
+
+    [Parameter]
+    public string? Help { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public RenderFragment<FormFieldContext>? ChildContent { get; set; }
+
+    private string HelpId => $"{Id}-help";
+    private string ErrorId => $"{Id}-error";
+
+    protected override void OnParametersSet() =>
+        fieldContext = new FormFieldContext(Help is null ? ErrorId : $"{HelpId} {ErrorId}");
+}

@@ -1,0 +1,146 @@
+/*
+  Zelis Lumen-style design tokens: the one place that defines color, type, spacing, shape,
+  depth and motion. The brand and semantic values come from the design brief; the "derived"
+  values are calculated from them. Components use these variables instead of literal values.
+*/
+:root {
+  /* Brand */
+  --zelis-ink-blue: #23004B;
+  --zelis-royal-purple: #41329B;
+  --zelis-bright-blue: #320FFF;
+  --zelis-solar-yellow: #FFBE00;
+
+  /* Surfaces */
+  --zelis-ink-mist: #F7F6FF;
+  --zelis-white: #FFFFFF;
+  --zelis-warm-gray: #B4B4B9;
+
+  /* Text */
+  --zelis-text-primary: #23004B;
+  --zelis-text-secondary: #554A7A;
+
+  /* Semantic triplets: foreground, background, border */
+  --zelis-success-fg: #1B5E20;
+  --zelis-success-bg: #E6F4EA;
+  --zelis-success-border: #2E7D32;
+
+  --zelis-warning-fg: #5C4100;
+  --zelis-warning-bg: #FFF4D6;
+  --zelis-warning-border: #7A5600;
+
+  --zelis-error-fg: #8B1F1F;
+  --zelis-error-bg: #FCE8E8;
+  --zelis-error-border: #C62828;
+
+  --zelis-info-fg: #23004B;
+  --zelis-info-bg: #F7F6FF;
+  --zelis-info-border: #41329B;
+
+  /* Lines and depth */
+  --zelis-border-subtle: rgba(35, 0, 75, 0.12);
+  --zelis-border-strong: rgba(35, 0, 75, 0.22);
+
+  --zelis-shadow-surface:
+    0 1px 2px rgba(35, 0, 75, 0.06),
+    0 0 0 1px rgba(35, 0, 75, 0.04);
+
+  --zelis-shadow-overlay:
+    0 4px 12px rgba(35, 0, 75, 0.10);
+
+  --zelis-shadow-modal:
+    0 12px 32px rgba(35, 0, 75, 0.18);
+
+  /* Derived colors (contrast ratios measured against white) */
+  --zelis-ink-blue-hover: #2C0F63;
+  --zelis-ink-blue-active: #180034;
+  --zelis-border-control: #8C80A3;      /* input borders, 3.7:1 (WCAG 1.4.11 needs 3:1) */
+  --zelis-text-placeholder: #6E6488;    /* 5.5:1 */
+  --zelis-text-on-dark: #FFFFFF;
+  --zelis-text-on-dark-muted: rgba(255, 255, 255, 0.78);
+  --zelis-tint-hover: rgba(65, 50, 155, 0.05);     /* Royal Purple tints */
+  --zelis-tint-selected: rgba(65, 50, 155, 0.10);
+  --zelis-tint-pressed: rgba(65, 50, 155, 0.14);
+  --zelis-surface-hover: #F6F5FA;                  /* the same tints, opaque */
+  --zelis-surface-pressed: #ECEAF5;
+  --zelis-table-header-bg: #F3F1FA;                /* opaque so a sticky header hides the rows under it */
+  --zelis-tint-on-dark-hover: rgba(255, 255, 255, 0.12);
+  --zelis-tint-on-dark-pressed: rgba(255, 255, 255, 0.20);
+  --zelis-divider-on-dark: rgba(255, 255, 255, 0.32);
+  --zelis-scrim: rgba(35, 0, 75, 0.40);
+  --zelis-disabled-bg: #ECEAF2;
+  --zelis-disabled-fg: #6E6488;
+  --zelis-skeleton: #ECEAF5;
+  --zelis-skeleton-highlight: #F7F6FF;
+
+  /* Chart sequence. No charts yet; defined so future charts start on-brand. */
+  --zelis-chart-1: #23004B;
+  --zelis-chart-2: #320FFF;
+  --zelis-chart-3: #41329B;
+  --zelis-chart-4: #FFBE00;
+  --zelis-chart-5: #554A7A;
+
+  /* Typography */
+  --zelis-font-family: "Avenir Next LT Pro", "Avenir Next", "Segoe UI", Arial, sans-serif;
+  --zelis-font-family-mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+  --zelis-font-size-page-title: 1.5rem;      /* 24px */
+  --zelis-font-size-section-title: 1.25rem;  /* 20px */
+  --zelis-font-size-panel-title: 1.125rem;   /* 18px: drawers and dialogs */
+  --zelis-font-size-card-title: 1rem;        /* 16px */
+  --zelis-font-size-body: 0.875rem;          /* 14px */
+  --zelis-font-size-dense: 0.8125rem;        /* 13px: tables */
+  --zelis-font-size-label: 0.75rem;          /* 12px */
+  --zelis-font-size-overline: 0.6875rem;     /* 11px */
+  --zelis-font-size-kpi: 1.75rem;            /* 28px */
+  --zelis-font-weight-regular: 400;
+  --zelis-font-weight-semibold: 600;
+  --zelis-font-weight-bold: 700;
+  --zelis-line-height-body: 1.5;
+  --zelis-line-height-title: 1.25;
+  --zelis-line-height-section: 1.3;
+  --zelis-letter-spacing-overline: 0.06em;
+
+  /* Spacing: 8px foundation */
+  --zelis-space-1: 0.25rem;  /* 4px */
+  --zelis-space-2: 0.5rem;   /* 8px */
+  --zelis-space-3: 0.75rem;  /* 12px */
+  --zelis-space-4: 1rem;     /* 16px */
+  --zelis-space-5: 1.5rem;   /* 24px */
+  --zelis-space-6: 2rem;     /* 32px */
+  --zelis-space-7: 3rem;     /* 48px */
+
+  /* Shape */
+  --zelis-radius-control: 4px;
+  --zelis-radius-button: 8px;
+  --zelis-radius-card: 10px;
+  --zelis-radius-hero: 14px;
+  --zelis-radius-pill: 999px;
+
+  /* Sizes */
+  --zelis-header-height: 64px;
+  --zelis-nav-width: 248px;
+  --zelis-nav-rail-width: 64px;
+  --zelis-control-height: 40px;
+  --zelis-touch-target: 44px;
+  --zelis-row-height: 44px;
+  --zelis-drawer-width: 560px;
+  --zelis-modal-width: 440px;
+  --zelis-icon-size: 20px;
+
+  /* Focus: 3px ring, 2px offset (white on dark surfaces) */
+  --zelis-focus-ring: 3px solid var(--zelis-ink-blue);
+  --zelis-focus-ring-on-dark: 3px solid var(--zelis-white);
+  --zelis-focus-ring-offset: 2px;
+
+  /* Motion */
+  --zelis-duration-fast: 120ms;   /* hover and focus */
+  --zelis-duration-base: 200ms;   /* menus, drawers, toasts */
+  --zelis-duration-slow: 320ms;   /* significant layout changes */
+  --zelis-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layers */
+  --zelis-z-sticky: 2;
+  --zelis-z-header: 1030;
+  --zelis-z-nav-overlay: 1040;
+  --zelis-z-dropdown: 1050;
+  --zelis-z-toast: 1090;
+}

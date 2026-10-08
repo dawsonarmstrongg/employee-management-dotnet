@@ -1,0 +1,51 @@
+@* Designed placeholder for "nothing here yet", "not found" and "couldn't load" states. *@
+<div class="zl-empty-state @(Tone == Tone.Error ? "zl-empty-state--error" : null)" role="@(Tone == Tone.Error ? "alert" : null)">
+    <div class="zl-empty-state__icon">
+        <Icon Name="Icon" Size="28" />
+    </div>
+    @if (HeadingLevel == 1)
+    {
+        <h1 class="zl-empty-state__title" tabindex="-1">@Title</h1>
+    }
+    else
+    {
+        <h2 class="zl-empty-state__title">@Title</h2>
+    }
+    @if (Message is not null)
+    {
+        <p class="zl-empty-state__message">@Message</p>
+    }
+    @if (Details is not null)
+    {
+        <div class="zl-empty-state__details">@Details</div>
+    }
+    @if (ChildContent is not null)
+    {
+        <div class="zl-empty-state__actions">@ChildContent</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public IconName Icon { get; set; } = IconName.Info;
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public Tone Tone { get; set; } = Tone.Neutral;
+
+    // 1 when the state is the whole page (not found, error); otherwise 2.
+    [Parameter]
+    public int HeadingLevel { get; set; } = 2;
+
+    [Parameter]
+    public RenderFragment? Details { get; set; }
+
+    // Actions, such as a button.
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

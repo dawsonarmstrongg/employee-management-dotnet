@@ -1,0 +1,39 @@
+@* Placeholder rows shaped like the real table while data loads. Screen readers hear the label only. *@
+<div class="zl-table-scroll" aria-busy="true">
+    <p class="visually-hidden" role="status">@Label</p>
+    <table class="zl-table" aria-hidden="true">
+        <thead>
+            <tr>
+                @foreach (var column in Columns)
+                {
+                    <th scope="col">@column</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (var row = 0; row < Rows; row++)
+            {
+                <tr>
+                    @for (var column = 0; column < Columns.Count; column++)
+                    {
+                        <td><span class="zl-skeleton" style="width: @Width(row, column)%"></span></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Columns { get; set; } = [];
+
+    [Parameter]
+    public int Rows { get; set; } = 5;
+
+    [Parameter]
+    public string Label { get; set; } = "Loading";
+
+    // Varied but fixed widths (45-85%) so the placeholder looks like text, not a grid of bars.
+    private static int Width(int row, int column) => 45 + ((row * 3) + (column * 5)) % 5 * 10;
+}

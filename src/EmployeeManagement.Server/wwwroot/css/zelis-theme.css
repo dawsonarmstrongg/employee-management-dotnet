@@ -1,0 +1,1101 @@
+/*
+  Zelis theme. Maps Bootstrap 5.3 onto the tokens in zelis-tokens.css and defines the shared
+  zl-* component classes used by the Blazor components.
+  Load order: bootstrap.min.css, zelis-tokens.css, zelis-theme.css, then scoped component CSS.
+*/
+
+/* 1. Bootstrap mapping ----------------------------------------------------------------- */
+:root {
+  --bs-body-font-family: var(--zelis-font-family);
+  --bs-body-font-size: var(--zelis-font-size-body);
+  --bs-body-line-height: var(--zelis-line-height-body);
+  --bs-body-color: var(--zelis-text-primary);
+  --bs-body-color-rgb: 35, 0, 75;
+  --bs-body-bg: var(--zelis-ink-mist);
+  --bs-body-bg-rgb: 247, 246, 255;
+  --bs-emphasis-color: var(--zelis-ink-blue);
+  --bs-secondary-color: var(--zelis-text-secondary);
+  --bs-heading-color: var(--zelis-ink-blue);
+  --bs-primary: var(--zelis-ink-blue);
+  --bs-primary-rgb: 35, 0, 75;
+  --bs-link-color: var(--zelis-bright-blue);
+  --bs-link-color-rgb: 50, 15, 255;
+  --bs-link-hover-color: var(--zelis-ink-blue);
+  --bs-link-hover-color-rgb: 35, 0, 75;
+  --bs-border-color: var(--zelis-border-subtle);
+  --bs-border-radius: var(--zelis-radius-control);
+  --bs-code-color: var(--zelis-royal-purple);
+}
+
+/* 2. Base -------------------------------------------------------------------------------- */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--zelis-font-weight-semibold);
+  color: var(--zelis-ink-blue);
+}
+
+a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+::selection {
+  background: var(--zelis-tint-pressed);
+}
+
+:focus-visible {
+  outline: var(--zelis-focus-ring);
+  outline-offset: var(--zelis-focus-ring-offset);
+}
+
+/* Headings and <main> receive focus from code (page navigation, skip link); no ring needed. */
+h1[tabindex="-1"]:focus,
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Stop the page scrolling behind an open modal dialog or drawer. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+.zl-icon {
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.zl-mono {
+  font-family: var(--zelis-font-family-mono);
+  font-size: 0.95em;
+}
+
+.zl-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.zl-nowrap {
+  white-space: nowrap;
+}
+
+.zl-overline {
+  margin: 0 0 var(--zelis-space-1);
+  font-size: var(--zelis-font-size-overline);
+  font-weight: var(--zelis-font-weight-bold);
+  line-height: 1.4;
+  letter-spacing: var(--zelis-letter-spacing-overline);
+  text-transform: uppercase;
+  color: var(--zelis-text-secondary);
+}
+
+/* 3. Buttons ------------------------------------------------------------------------------ */
+.btn {
+  --bs-btn-padding-x: var(--zelis-space-4);
+  --bs-btn-padding-y: var(--zelis-space-2);
+  --bs-btn-font-family: var(--zelis-font-family);
+  --bs-btn-font-size: var(--zelis-font-size-body);
+  --bs-btn-font-weight: var(--zelis-font-weight-semibold);
+  --bs-btn-line-height: var(--zelis-line-height-body);
+  --bs-btn-border-radius: var(--zelis-radius-button);
+  --bs-btn-disabled-opacity: 1;
+  --bs-btn-focus-box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zelis-space-2);
+  min-height: var(--zelis-control-height);
+  transition:
+    color var(--zelis-duration-fast) var(--zelis-ease-standard),
+    background-color var(--zelis-duration-fast) var(--zelis-ease-standard),
+    border-color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+.btn:focus-visible {
+  outline: var(--zelis-focus-ring);
+  outline-offset: var(--zelis-focus-ring-offset);
+  box-shadow: none;
+}
+
+.btn-sm {
+  --bs-btn-padding-x: var(--zelis-space-3);
+  --bs-btn-padding-y: var(--zelis-space-1);
+  --bs-btn-font-size: var(--zelis-font-size-dense);
+  --bs-btn-border-radius: var(--zelis-radius-button);
+  min-height: 2rem;
+}
+
+/* Primary: one per action area. */
+.btn-primary {
+  --bs-btn-color: var(--zelis-white);
+  --bs-btn-bg: var(--zelis-ink-blue);
+  --bs-btn-border-color: var(--zelis-ink-blue);
+  --bs-btn-hover-color: var(--zelis-white);
+  --bs-btn-hover-bg: var(--zelis-ink-blue-hover);
+  --bs-btn-hover-border-color: var(--zelis-ink-blue-hover);
+  --bs-btn-active-color: var(--zelis-white);
+  --bs-btn-active-bg: var(--zelis-ink-blue-active);
+  --bs-btn-active-border-color: var(--zelis-ink-blue-active);
+  --bs-btn-disabled-color: var(--zelis-disabled-fg);
+  --bs-btn-disabled-bg: var(--zelis-disabled-bg);
+  --bs-btn-disabled-border-color: var(--zelis-disabled-bg);
+}
+
+.btn-secondary {
+  --bs-btn-color: var(--zelis-ink-blue);
+  --bs-btn-bg: var(--zelis-white);
+  --bs-btn-border-color: var(--zelis-border-strong);
+  --bs-btn-hover-color: var(--zelis-ink-blue);
+  --bs-btn-hover-bg: var(--zelis-surface-hover);
+  --bs-btn-hover-border-color: var(--zelis-royal-purple);
+  --bs-btn-active-color: var(--zelis-ink-blue);
+  --bs-btn-active-bg: var(--zelis-surface-pressed);
+  --bs-btn-active-border-color: var(--zelis-royal-purple);
+  --bs-btn-disabled-color: var(--zelis-disabled-fg);
+  --bs-btn-disabled-bg: var(--zelis-white);
+  --bs-btn-disabled-border-color: var(--zelis-border-subtle);
+}
+
+/* Tertiary: text or icon only; a container appears on hover and focus. */
+.btn-tertiary {
+  --bs-btn-padding-x: var(--zelis-space-3);
+  --bs-btn-color: var(--zelis-royal-purple);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-color: var(--zelis-ink-blue);
+  --bs-btn-hover-bg: var(--zelis-tint-selected);
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-color: var(--zelis-ink-blue);
+  --bs-btn-active-bg: var(--zelis-tint-pressed);
+  --bs-btn-active-border-color: transparent;
+  --bs-btn-disabled-color: var(--zelis-disabled-fg);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: transparent;
+}
+
+/* Destructive: error palette, kept apart from everyday actions and confirmed first. */
+.btn-danger {
+  --bs-btn-color: var(--zelis-white);
+  --bs-btn-bg: var(--zelis-error-border);
+  --bs-btn-border-color: var(--zelis-error-border);
+  --bs-btn-hover-color: var(--zelis-white);
+  --bs-btn-hover-bg: var(--zelis-error-fg);
+  --bs-btn-hover-border-color: var(--zelis-error-fg);
+  --bs-btn-active-color: var(--zelis-white);
+  --bs-btn-active-bg: var(--zelis-error-fg);
+  --bs-btn-active-border-color: var(--zelis-error-fg);
+  --bs-btn-disabled-color: var(--zelis-disabled-fg);
+  --bs-btn-disabled-bg: var(--zelis-disabled-bg);
+  --bs-btn-disabled-border-color: var(--zelis-disabled-bg);
+}
+
+.btn-icon {
+  --bs-btn-padding-x: 0;
+  --bs-btn-padding-y: 0;
+  width: var(--zelis-control-height);
+  height: var(--zelis-control-height);
+}
+
+.btn-icon.btn-sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* 4. Forms -------------------------------------------------------------------------------- */
+.form-label {
+  margin-bottom: var(--zelis-space-1);
+  font-size: var(--zelis-font-size-label);
+  font-weight: var(--zelis-font-weight-semibold);
+  color: var(--zelis-text-primary);
+}
+
+/* Required marker: explained once at the top of each form; never red before an error. */
+.zl-required {
+  margin-left: 0.125rem;
+  color: var(--zelis-text-secondary);
+}
+
+.zl-optional {
+  margin-left: var(--zelis-space-1);
+  font-weight: var(--zelis-font-weight-regular);
+  color: var(--zelis-text-secondary);
+}
+
+.form-control,
+.form-select {
+  min-height: var(--zelis-control-height);
+  padding: 0.5rem 0.75rem;
+  font-size: var(--zelis-font-size-body);
+  line-height: var(--zelis-line-height-body);
+  color: var(--zelis-text-primary);
+  background-color: var(--zelis-white);
+  border-color: var(--zelis-border-control);
+  border-radius: var(--zelis-radius-control);
+  transition: border-color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+/* Data URIs can't read CSS variables, so the chevron color is Ink Blue written out. */
+.form-select {
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2323004B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  padding-right: 2.25rem;
+}
+
+.form-control:hover:not(:disabled):not(:focus),
+.form-select:hover:not(:disabled):not(:focus) {
+  border-color: var(--zelis-royal-purple);
+}
+
+.form-control:focus,
+.form-select:focus {
+  color: var(--zelis-text-primary);
+  background-color: var(--zelis-white);
+  border-color: var(--zelis-ink-blue);
+  outline: var(--zelis-focus-ring);
+  outline-offset: var(--zelis-focus-ring-offset);
+  box-shadow: none;
+}
+
+.form-control::placeholder {
+  color: var(--zelis-text-placeholder);
+  opacity: 1;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  color: var(--zelis-disabled-fg);
+  background-color: var(--zelis-disabled-bg);
+  border-color: var(--zelis-border-subtle);
+}
+
+/* Blazor marks a field "invalid" (and sets aria-invalid) only after it has been validated. */
+.form-control.invalid,
+.form-control[aria-invalid="true"],
+.form-select.invalid {
+  border-color: var(--zelis-error-border);
+}
+
+.validation-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zelis-space-1);
+  margin-top: var(--zelis-space-1);
+  font-size: var(--zelis-font-size-label);
+  font-weight: var(--zelis-font-weight-semibold);
+  line-height: 1.4;
+  color: var(--zelis-error-fg);
+}
+
+.validation-message::before {
+  content: "";
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-top: 0.0625rem;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round'%3e%3ccircle cx='12' cy='12' r='9'/%3e%3cpath d='M12 7.5v5.5M12 16.5h.01'/%3e%3c/svg%3e") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.25' stroke-linecap='round'%3e%3ccircle cx='12' cy='12' r='9'/%3e%3cpath d='M12 7.5v5.5M12 16.5h.01'/%3e%3c/svg%3e") no-repeat center / contain;
+}
+
+.zl-help {
+  margin: var(--zelis-space-1) 0 0;
+  font-size: var(--zelis-font-size-label);
+  line-height: 1.4;
+  color: var(--zelis-text-secondary);
+}
+
+/* Lets long values and validation messages wrap inside narrow grid columns. */
+.zl-field {
+  min-width: 0;
+}
+
+/* Server error shown at the top of a form; focused after a failed save so it is read first. */
+.zl-form-error {
+  margin-bottom: var(--zelis-space-4);
+}
+
+.zl-form-error:focus {
+  outline: none;
+}
+
+.zl-form-note {
+  margin: 0 0 var(--zelis-space-5);
+  font-size: var(--zelis-font-size-label);
+  color: var(--zelis-text-secondary);
+}
+
+.zl-form-section {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.zl-form-section + .zl-form-section {
+  margin-top: var(--zelis-space-5);
+  padding-top: var(--zelis-space-5);
+  border-top: 1px solid var(--zelis-border-subtle);
+}
+
+/* Floated (as in Bootstrap) so the legend lays out like a heading instead of sitting in the fieldset border. */
+.zl-form-section__title {
+  float: left;
+  width: 100%;
+  margin: 0 0 var(--zelis-space-4);
+  padding: 0;
+  font-size: var(--zelis-font-size-card-title);
+  font-weight: var(--zelis-font-weight-semibold);
+  line-height: 1.4;
+  color: var(--zelis-ink-blue);
+}
+
+.zl-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--zelis-space-4);
+}
+
+.zl-form-grid--city-state-zip {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.zl-span-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 575.98px) {
+  .zl-form-grid,
+  .zl-form-grid--city-state-zip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 5. Cards and page header ------------------------------------------------------------------ */
+.zl-card {
+  background: var(--zelis-white);
+  border-radius: var(--zelis-radius-card);
+  box-shadow: var(--zelis-shadow-surface);
+}
+
+.zl-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zelis-space-2) var(--zelis-space-4);
+  padding: var(--zelis-space-3) var(--zelis-space-4) var(--zelis-space-3) var(--zelis-space-5);
+  border-bottom: 1px solid var(--zelis-border-subtle);
+}
+
+.zl-card__title {
+  display: flex;
+  align-items: center;
+  gap: var(--zelis-space-2);
+  margin: 0;
+  font-size: var(--zelis-font-size-card-title);
+  font-weight: var(--zelis-font-weight-semibold);
+  line-height: 1.4;
+}
+
+.zl-card__meta {
+  font-size: var(--zelis-font-size-label);
+  color: var(--zelis-text-secondary);
+}
+
+.zl-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.25rem;
+  padding: 0 var(--zelis-space-2);
+  border-radius: var(--zelis-radius-pill);
+  font-size: var(--zelis-font-size-label);
+  font-weight: var(--zelis-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--zelis-royal-purple);
+  background: var(--zelis-tint-selected);
+}
+
+.zl-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--zelis-space-4);
+  margin-bottom: var(--zelis-space-5);
+}
+
+.zl-page-header__text {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+.zl-page-title {
+  margin: 0;
+  font-size: var(--zelis-font-size-page-title);
+  font-weight: var(--zelis-font-weight-semibold);
+  line-height: var(--zelis-line-height-title);
+  color: var(--zelis-ink-blue);
+}
+
+.zl-page-description {
+  max-width: 48rem;
+  margin: var(--zelis-space-1) 0 0;
+  color: var(--zelis-text-secondary);
+}
+
+.zl-page-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zelis-space-1) var(--zelis-space-3);
+  margin-top: var(--zelis-space-2);
+  font-size: var(--zelis-font-size-label);
+  color: var(--zelis-text-secondary);
+}
+
+.zl-page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zelis-space-2);
+}
+
+@media (max-width: 575.98px) {
+  .zl-page-header__actions {
+    width: 100%;
+  }
+
+  .zl-page-header__actions > .btn {
+    flex: 1 1 0;
+  }
+}
+
+/* 6. Data tables ----------------------------------------------------------------------------- */
+.zl-table-scroll {
+  overflow: auto;
+  border-radius: inherit;
+}
+
+@media (min-width: 768px) {
+  /* Long lists scroll inside the card so the sticky header and page actions stay in view. */
+  .zl-table-scroll {
+    max-height: max(20rem, calc(100vh - 17rem));
+  }
+}
+
+.zl-table {
+  width: 100%;
+  min-width: 48rem;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--zelis-font-size-dense);
+  line-height: var(--zelis-line-height-body);
+  color: var(--zelis-text-primary);
+}
+
+.zl-table th,
+.zl-table td {
+  padding: var(--zelis-space-2) var(--zelis-space-4);
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--zelis-border-subtle);
+}
+
+.zl-table th:first-child,
+.zl-table td:first-child {
+  padding-left: var(--zelis-space-5);
+}
+
+.zl-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: var(--zelis-z-sticky);
+  height: var(--zelis-row-height);
+  font-size: var(--zelis-font-size-label);
+  font-weight: var(--zelis-font-weight-semibold);
+  white-space: nowrap;
+  color: var(--zelis-ink-blue);
+  background: var(--zelis-table-header-bg);
+  border-bottom-color: var(--zelis-border-strong);
+}
+
+.zl-table tbody td {
+  height: var(--zelis-row-height);
+}
+
+.zl-table tbody tr {
+  transition: background-color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+.zl-table tbody tr:hover {
+  background-color: var(--zelis-tint-hover);
+}
+
+.zl-table tbody tr.is-selected {
+  background-color: var(--zelis-tint-selected);
+}
+
+.zl-table tbody tr.is-selected > td:first-child {
+  box-shadow: inset 3px 0 0 var(--zelis-ink-blue);
+}
+
+.zl-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.zl-table .zl-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.zl-table .zl-cell-strong {
+  font-weight: var(--zelis-font-weight-semibold);
+  white-space: nowrap;
+}
+
+.zl-table .zl-cell-name {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zelis-space-2);
+}
+
+.zl-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zelis-space-1);
+  margin: calc(-1 * var(--zelis-space-1)) calc(-1 * var(--zelis-space-2));
+  padding: var(--zelis-space-1) var(--zelis-space-2);
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--zelis-radius-control);
+  transition: background-color var(--zelis-duration-fast) var(--zelis-ease-standard);
+}
+
+.zl-sort-button:hover {
+  background: var(--zelis-tint-selected);
+}
+
+.zl-sort-button .zl-icon {
+  color: var(--zelis-text-secondary);
+}
+
+[aria-sort] .zl-sort-button .zl-icon {
+  color: var(--zelis-ink-blue);
+}
+
+/* 7. Status chips ------------------------------------------------------------------------------ */
+.zl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zelis-space-1);
+  min-height: 1.375rem;
+  padding: 0 var(--zelis-space-2);
+  font-size: var(--zelis-font-size-label);
+  font-weight: var(--zelis-font-weight-semibold);
+  line-height: 1.4;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: var(--zelis-radius-pill);
+}
+
+.zl-chip .zl-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.zl-chip--success { color: var(--zelis-success-fg); background: var(--zelis-success-bg); border-color: var(--zelis-success-border); }
+.zl-chip--warning { color: var(--zelis-warning-fg); background: var(--zelis-warning-bg); border-color: var(--zelis-warning-border); }
+.zl-chip--error { color: var(--zelis-error-fg); background: var(--zelis-error-bg); border-color: var(--zelis-error-border); }
+.zl-chip--info { color: var(--zelis-info-fg); background: var(--zelis-info-bg); border-color: var(--zelis-info-border); }
+.zl-chip--neutral { color: var(--zelis-text-secondary); background: var(--zelis-white); border-color: var(--zelis-border-strong); }
+
+/* Attention: the rare Solar Yellow highlight. Always dark text on yellow, never white. */
+.zl-chip--attention { color: var(--zelis-ink-blue); background: var(--zelis-solar-yellow); border-color: var(--zelis-solar-yellow); }
+
+/* 8. Alerts ------------------------------------------------------------------------------------ */
+.zl-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--zelis-space-3);
+  padding: var(--zelis-space-3) var(--zelis-space-4);
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: var(--zelis-radius-button);
+}
+
+.zl-alert__icon {
+  margin-top: 0.0625rem;
+}
+
+.zl-alert__body {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.zl-alert__title {
+  margin: 0;
+  font-weight: var(--zelis-font-weight-semibold);
+}
+
+.zl-alert__message {
+  margin: 0;
+}
+
+.zl-alert__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zelis-space-2);
+  align-self: center;
+}
+
+.zl-alert--success { color: var(--zelis-success-fg); background: var(--zelis-success-bg); border-color: var(--zelis-success-border); }
+.zl-alert--warning { color: var(--zelis-warning-fg); background: var(--zelis-warning-bg); border-color: var(--zelis-warning-border); }
+.zl-alert--error { color: var(--zelis-error-fg); background: var(--zelis-error-bg); border-color: var(--zelis-error-border); }
+.zl-alert--info { color: var(--zelis-info-fg); background: var(--zelis-info-bg); border-color: var(--zelis-info-border); }
+
+/* 9. Toasts ------------------------------------------------------------------------------------ */
+.zl-toast-region {
+  position: fixed;
+  z-index: var(--zelis-z-toast);
+  right: var(--zelis-space-5);
+  bottom: var(--zelis-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zelis-space-2);
+  width: min(24rem, calc(100vw - 2 * var(--zelis-space-4)));
+  pointer-events: none;
+}
+
+.zl-toast {
+  --zl-toast-accent: var(--zelis-info-border);
+  --zl-toast-icon: var(--zelis-info-fg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zelis-space-3);
+  padding: var(--zelis-space-3) var(--zelis-space-2) var(--zelis-space-3) var(--zelis-space-4);
+  color: var(--zelis-text-primary);
+  background: var(--zelis-white);
+  border: 1px solid var(--zelis-border-subtle);
+  border-left: 4px solid var(--zl-toast-accent);
+  border-radius: var(--zelis-radius-card);
+  box-shadow: var(--zelis-shadow-overlay);
+  pointer-events: auto;
+  animation: zl-fade-up var(--zelis-duration-base) var(--zelis-ease-standard);
+}
+
+.zl-toast__icon {
+  margin-top: 0.5rem;
+  color: var(--zl-toast-icon);
+}
+
+.zl-toast__message {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0.5rem 0;
+  font-weight: var(--zelis-font-weight-semibold);
+}
+
+.zl-toast--success { --zl-toast-accent: var(--zelis-success-border); --zl-toast-icon: var(--zelis-success-fg); }
+.zl-toast--warning { --zl-toast-accent: var(--zelis-warning-border); --zl-toast-icon: var(--zelis-warning-fg); }
+.zl-toast--error { --zl-toast-accent: var(--zelis-error-border); --zl-toast-icon: var(--zelis-error-fg); }
+
+@media (max-width: 767.98px) {
+  .zl-toast-region {
+    right: var(--zelis-space-4);
+    bottom: var(--zelis-space-4);
+    left: var(--zelis-space-4);
+    width: auto;
+  }
+}
+
+/* 10. Dialogs: confirmation modal and right-side drawer ------------------------------------------ */
+.zl-dialog {
+  padding: 0;
+  color: var(--zelis-text-primary);
+  background: var(--zelis-white);
+  border: 0;
+}
+
+.zl-dialog::backdrop {
+  background: var(--zelis-scrim);
+}
+
+.zl-modal {
+  width: min(var(--zelis-modal-width), calc(100vw - 2 * var(--zelis-space-4)));
+  border-radius: var(--zelis-radius-card);
+  box-shadow: var(--zelis-shadow-modal);
+}
+
+.zl-modal[open] {
+  animation: zl-fade-up var(--zelis-duration-base) var(--zelis-ease-standard);
+}
+
+.zl-modal__body {
+  display: flex;
+  gap: var(--zelis-space-4);
+  padding: var(--zelis-space-5) var(--zelis-space-5) var(--zelis-space-4);
+}
+
+.zl-modal__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+
+.zl-modal__icon--warning { color: var(--zelis-warning-fg); background: var(--zelis-warning-bg); }
+.zl-modal__icon--error { color: var(--zelis-error-fg); background: var(--zelis-error-bg); }
+
+.zl-modal__title {
+  margin: 0;
+  font-size: var(--zelis-font-size-panel-title);
+  line-height: 1.4;
+}
+
+.zl-modal__message {
+  margin: var(--zelis-space-1) 0 0;
+  color: var(--zelis-text-secondary);
+}
+
+.zl-modal__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--zelis-space-2);
+  padding: var(--zelis-space-4) var(--zelis-space-5) var(--zelis-space-5);
+}
+
+.zl-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(var(--zelis-drawer-width), 100vw);
+  max-width: 100vw;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: var(--zelis-shadow-modal);
+}
+
+.zl-drawer[open] {
+  display: flex;
+  flex-direction: column;
+  animation: zl-slide-in var(--zelis-duration-base) var(--zelis-ease-standard);
+}
+
+.zl-drawer__header {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: var(--zelis-space-3);
+  padding: var(--zelis-space-4) var(--zelis-space-4) var(--zelis-space-4) var(--zelis-space-5);
+  border-bottom: 1px solid var(--zelis-border-subtle);
+}
+
+.zl-drawer__heading {
+  flex: 1;
+  min-width: 0;
+  padding-top: var(--zelis-space-1);
+}
+
+.zl-drawer__title {
+  margin: 0;
+  font-size: var(--zelis-font-size-panel-title);
+  line-height: 1.4;
+}
+
+.zl-drawer__description {
+  margin: var(--zelis-space-1) 0 0;
+  color: var(--zelis-text-secondary);
+}
+
+.zl-drawer__form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.zl-drawer__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--zelis-space-5);
+}
+
+.zl-drawer__footer {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  gap: var(--zelis-space-2);
+  padding: var(--zelis-space-4) var(--zelis-space-5);
+  background: var(--zelis-white);
+  border-top: 1px solid var(--zelis-border-subtle);
+}
+
+@media (max-width: 575.98px) {
+  .zl-drawer__footer > .btn {
+    flex: 1 1 0;
+  }
+}
+
+/* 11. Tooltips: the text repeats an accessible name, so nothing is available only on hover. ------- */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: var(--zelis-z-dropdown);
+  top: calc(100% + var(--zelis-space-2));
+  left: 50%;
+  padding: var(--zelis-space-1) var(--zelis-space-2);
+  font-size: var(--zelis-font-size-label);
+  font-weight: var(--zelis-font-weight-semibold);
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--zelis-white);
+  background: var(--zelis-ink-blue);
+  border-radius: var(--zelis-radius-control);
+  box-shadow: var(--zelis-shadow-overlay);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity var(--zelis-duration-fast) var(--zelis-ease-standard), visibility var(--zelis-duration-fast);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-tooltip-placement="left"]::after {
+  top: 50%;
+  right: calc(100% + var(--zelis-space-2));
+  left: auto;
+  transform: translateY(-50%);
+}
+
+[data-tooltip-placement="right"]::after {
+  top: 50%;
+  left: calc(100% + var(--zelis-space-2));
+  transform: translateY(-50%);
+}
+
+/* 12. Empty, loading and error states -------------------------------------------------------------- */
+.zl-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--zelis-space-2);
+  padding: var(--zelis-space-7) var(--zelis-space-5);
+  text-align: center;
+}
+
+.zl-empty-state__icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: var(--zelis-space-2);
+  color: var(--zelis-royal-purple);
+  background: var(--zelis-ink-mist);
+  border-radius: 50%;
+}
+
+.zl-empty-state__title {
+  margin: 0;
+  font-size: var(--zelis-font-size-section-title);
+  line-height: var(--zelis-line-height-section);
+}
+
+.zl-empty-state__message {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--zelis-text-secondary);
+}
+
+.zl-empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--zelis-space-2);
+  margin-top: var(--zelis-space-3);
+}
+
+.zl-empty-state--error .zl-empty-state__icon {
+  color: var(--zelis-error-fg);
+  background: var(--zelis-error-bg);
+}
+
+.zl-empty-state__details {
+  font-size: var(--zelis-font-size-label);
+  color: var(--zelis-text-secondary);
+}
+
+.zl-empty-state__details p {
+  margin: 0;
+}
+
+.zl-skeleton {
+  display: block;
+  height: 0.75rem;
+  background: linear-gradient(90deg, var(--zelis-skeleton) 25%, var(--zelis-skeleton-highlight) 50%, var(--zelis-skeleton) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--zelis-radius-control);
+  animation: zl-shimmer 1.4s ease-in-out infinite;
+}
+
+.zl-spinner {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--zelis-skeleton);
+  border-top-color: var(--zelis-ink-blue);
+  border-radius: 50%;
+  animation: zl-spin 0.8s linear infinite;
+}
+
+/* Inline spinner for buttons; takes the button's text color. */
+.zl-spinner--sm {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+}
+
+/* Shown by the static page until the WebAssembly app starts and renders its shell. */
+.zl-boot {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--zelis-ink-mist);
+}
+
+.zl-boot__bar {
+  flex: none;
+  height: var(--zelis-header-height);
+  background: var(--zelis-ink-blue);
+}
+
+.zl-boot__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zelis-space-3);
+  color: var(--zelis-text-secondary);
+}
+
+body:has(.zl-shell) .zl-boot {
+  display: none;
+}
+
+/* Blazor shows this bar (display: block) when an unhandled exception reaches the renderer. */
+#blazor-error-ui {
+  display: none;
+  position: fixed;
+  z-index: var(--zelis-z-toast);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: var(--zelis-space-3) var(--zelis-space-5);
+  color: var(--zelis-error-fg);
+  background: var(--zelis-error-bg);
+  border-top: 1px solid var(--zelis-error-border);
+  box-shadow: var(--zelis-shadow-overlay);
+}
+
+.zl-error-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zelis-space-3);
+}
+
+.zl-error-bar__message {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-weight: var(--zelis-font-weight-semibold);
+}
+
+.blazor-error-boundary {
+  padding: var(--zelis-space-3) var(--zelis-space-4);
+  color: var(--zelis-error-fg);
+  background: var(--zelis-error-bg);
+  border: 1px solid var(--zelis-error-border);
+  border-left-width: 4px;
+  border-radius: var(--zelis-radius-button);
+}
+
+.blazor-error-boundary::after {
+  content: "An error has occurred.";
+}
+
+/* 13. Motion --------------------------------------------------------------------------------------- */
+@keyframes zl-slide-in {
+  from { opacity: 0; transform: translateX(var(--zelis-space-6)); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes zl-fade-up {
+  from { opacity: 0; transform: translateY(var(--zelis-space-2)); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes zl-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+@keyframes zl-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 14. Touch: 44px targets on coarse pointers ------------------------------------------------------- */
+@media (pointer: coarse) {
+  .btn,
+  .form-control,
+  .form-select {
+    min-height: var(--zelis-touch-target);
+  }
+
+  .btn-icon,
+  .btn-icon.btn-sm {
+    width: var(--zelis-touch-target);
+    height: var(--zelis-touch-target);
+  }
+}

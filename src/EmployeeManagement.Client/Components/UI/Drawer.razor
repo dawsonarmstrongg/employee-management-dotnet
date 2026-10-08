@@ -1,0 +1,42 @@
+@* Right-side panel for a short task, such as adding an employee. Built on Dialog, so it is modal:
+   focus stays inside and the page behind it is inert until it closes. *@
+<Dialog Open="Open" Class="zl-drawer" OnCloseRequested="OnCloseRequested" OnClosed="OnClosed"
+        aria-labelledby="@titleId" aria-describedby="@(Description is null ? null : descriptionId)">
+    <div class="zl-drawer__header">
+        <div class="zl-drawer__heading">
+            <h2 id="@titleId" class="zl-drawer__title">@Title</h2>
+            @if (Description is not null)
+            {
+                <p id="@descriptionId" class="zl-drawer__description">@Description</p>
+            }
+        </div>
+        <button type="button" class="btn btn-tertiary btn-icon" aria-label="Close" data-tooltip="Close"
+                data-tooltip-placement="left" @onclick="OnCloseRequested">
+            <Icon Name="IconName.Close" />
+        </button>
+    </div>
+    @ChildContent
+</Dialog>
+
+@code {
+    private readonly string titleId = $"drawer-title-{Guid.NewGuid():N}";
+    private readonly string descriptionId = $"drawer-description-{Guid.NewGuid():N}";
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback OnCloseRequested { get; set; }
+
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+}

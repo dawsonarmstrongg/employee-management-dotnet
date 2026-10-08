@@ -1,0 +1,51 @@
+@* Small modal for a confirmation. Focus starts on the safe choice (Cancel), and Escape or a backdrop
+   click also cancel. *@
+<Dialog Open="Open" Class="zl-modal" role="alertdialog" aria-labelledby="@titleId" aria-describedby="@messageId"
+        OnCloseRequested="OnCancel" OnClosed="OnClosed">
+    <div class="zl-modal__body">
+        <div class="zl-modal__icon zl-modal__icon--@(Destructive ? "error" : "warning")">
+            <Icon Name="@(Destructive ? IconName.ErrorCircle : IconName.Warning)" />
+        </div>
+        <div>
+            <h2 id="@titleId" class="zl-modal__title">@Title</h2>
+            <p id="@messageId" class="zl-modal__message">@Message</p>
+        </div>
+    </div>
+    <div class="zl-modal__footer">
+        <button type="button" class="btn btn-secondary" autofocus @onclick="OnCancel">@CancelText</button>
+        <button type="button" class="btn @(Destructive ? "btn-danger" : "btn-primary")" @onclick="OnConfirm">@ConfirmText</button>
+    </div>
+</Dialog>
+
+@code {
+    private readonly string titleId = $"confirm-title-{Guid.NewGuid():N}";
+    private readonly string messageId = $"confirm-message-{Guid.NewGuid():N}";
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Message { get; set; } = "";
+
+    [Parameter]
+    public string ConfirmText { get; set; } = "Confirm";
+
+    [Parameter]
+    public string CancelText { get; set; } = "Cancel";
+
+    // Uses the error palette for the confirm button, for actions that lose data.
+    [Parameter]
+    public bool Destructive { get; set; }
+
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback OnClosed { get; set; }
+}
