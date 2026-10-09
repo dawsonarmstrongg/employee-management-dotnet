@@ -4,8 +4,7 @@ using EmployeeManagement.Contracts.Employees;
 
 namespace EmployeeManagement.Tests.Components;
 
-// R-15: the employee table must show exactly Name, Email, Phone, Address (combined),
-// plus the documented extra Date of birth column (see AI_USAGE/README deviation).
+// R-15: the employee table must show exactly Name, Email, Phone, Address (combined)
 [Trait("Requirement", "R-15")]
 public class EmployeeTableTests : BunitContext
 {

@@ -50,16 +50,6 @@ public class EmployeeSorterTests
     }
 
     [Fact]
-    public void Sort_ByDateOfBirth_OrdersOldestFirstWhenAscending()
-    {
-        var sort = new EmployeeSort(EmployeeSortColumn.DateOfBirth, SortDirection.Ascending);
-
-        var result = EmployeeSorter.Sort(Sample, sort);
-
-        Assert.Equal([1975, 1980, 1991], result.Select(e => e.DateOfBirth.Year));
-    }
-
-    [Fact]
     public void Toggle_SameColumnTwice_FlipsDirection()
     {
         var sort = EmployeeSort.Default.Toggle(EmployeeSortColumn.Name);

@@ -8,7 +8,6 @@
                 <SortableHeader Column="EmployeeSortColumn.Name" Label="Name" Sort="sort" OnSort="ChangeSort" />
                 <SortableHeader Column="EmployeeSortColumn.Email" Label="Email" Sort="sort" OnSort="ChangeSort" />
                 <th scope="col">Phone</th>
-                <SortableHeader Column="EmployeeSortColumn.DateOfBirth" Label="Date of birth" Sort="sort" OnSort="ChangeSort" />
                 <th scope="col">Address</th>
             </tr>
         </thead>
@@ -27,7 +26,6 @@
                     </td>
                     <td><a href="mailto:@employee.Email">@employee.Email</a></td>
                     <td class="zl-tabular zl-nowrap">@employee.PhoneNumber</td>
-                    <td class="zl-tabular zl-nowrap">@EmployeeDisplay.DateOfBirth(employee.DateOfBirth)</td>
                     <td>@EmployeeDisplay.FullAddress(employee.Address)</td>
                 </tr>
             }
@@ -62,7 +60,6 @@
     private static string ColumnName(EmployeeSortColumn column) => column switch
     {
         EmployeeSortColumn.Email => "email",
-        EmployeeSortColumn.DateOfBirth => "date of birth",
         _ => "last name",
     };
 

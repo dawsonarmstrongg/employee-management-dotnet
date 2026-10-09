@@ -92,7 +92,7 @@
                OnConfirm="DiscardChanges" OnCancel="KeepEditing" OnClosed="HandleConfirmClosed" />
 
 @code {
-    private static readonly string[] SkeletonColumns = ["Name", "Email", "Phone", "Date of birth", "Address"];
+    private static readonly string[] SkeletonColumns = ["Name", "Email", "Phone", "Address"];
 
     private readonly HashSet<int> newIds = [];
     private List<EmployeeDto>? employees;

@@ -6,7 +6,6 @@ public enum EmployeeSortColumn
 {
     Name,
     Email,
-    DateOfBirth,
 }
 
 public enum SortDirection
@@ -38,9 +37,6 @@ public static class EmployeeSorter
         var ordered = sort.Column switch
         {
             EmployeeSortColumn.Email => By(employees, e => e.Email, text, descending),
-            EmployeeSortColumn.DateOfBirth => By(employees, e => e.DateOfBirth, Comparer<DateOnly>.Default, descending)
-                .ThenBy(e => e.LastName, text)
-                .ThenBy(e => e.FirstName, text),
             _ => ThenBy(By(employees, e => e.LastName, text, descending), e => e.FirstName, text, descending),
         };
 
